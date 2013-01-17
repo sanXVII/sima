@@ -16,22 +16,25 @@ typedef struct ant
 	
 	float axis_len; /* Width of this ant. (metr) */
 	float tire_radius; /* (metr) */
+	
+	struct ant * next;
 } ant;
 
 
 /* Main struct for fully describe of one system. */
 typedef struct wd_of_ants
 {
-	int value;
+	ant * muvis; /* List of muvi ants. */
 
 } wd_of_ants;
 
 
 
-
+/* Prepare of all data structures. */
 int wd_of_ants_init( void );
 
-
+/* Destroy data structures. */
+void wd_of_ants_destroy( void );
 
 
 
