@@ -11,7 +11,7 @@ typedef struct ant
 	float left_angle; /* Current left tire angle (rad) */
 	float right_angle; /* Current right tire angle (rad) */
 	
-	float left_speed; /* Angle speed of legt tire (rad/sec) */
+	float left_speed; /* Angle speed of left tire (rad/sec) */
 	float right_speed; /* Right tire (rad/sec) */
 	
 	float axis_len; /* Width of this ant. (metr) */
