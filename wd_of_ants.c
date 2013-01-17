@@ -6,7 +6,7 @@
 
 int wd_of_ants_init( void )
 {
-	printf( " Make the Word of Ants complete!\n" );
+	printf( "I am happy say you that: Make the Word of Ants complete!\n" );
 	return 0;
 }
 
