@@ -3,6 +3,13 @@
 
 
 
+/* Main struct for fully describe of one system. */
+typedef struct wd_of_ants
+{
+	int value;
+
+} wd_of_ants;
+
 
 
 
