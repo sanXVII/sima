@@ -15,7 +15,7 @@ static void print_help()
 {
 	printf( "Simulation for Ants action.\n\n" );
 	printf( "Keys:\n" );
-	printf( "     -h, --help        Print this help information.\n" );
+	printf( "     -h, --help        Print this help information about mosaic ants simulator.\n" );
 	printf( "\n" );
 }
 
