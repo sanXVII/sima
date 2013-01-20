@@ -37,5 +37,8 @@ int wd_of_ants_init( void );
 void wd_of_ants_destroy( void );
 
 
+/* One step to future. */
+void wd_of_ants_run( void );
+
 
 #endif /* WD_OF_ANTS_H_ */

@@ -44,5 +44,7 @@ int main( int argc, char ** argv )
 	/* Chek all data and run world */
 	wd_of_ants_init();
 
+	wd_of_ants_destroy();
+
 	return 0;
 }

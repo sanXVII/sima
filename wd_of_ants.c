@@ -42,3 +42,16 @@ void wd_of_ants_destroy( void )
 		free( rip );
 	}
 }
+
+void wd_of_ants_run( void )
+{
+	/* Time forward. Calculate new positions for ants. */
+	ant * cant = my_world.muvis;
+	while( cant )
+	{
+		
+
+		cant = cant->next;
+	}
+}
+
