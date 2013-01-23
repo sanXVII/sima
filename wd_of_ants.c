@@ -27,7 +27,7 @@ int wd_of_ants_init( void )
 	/* My first ant named "Muvi" */
 	add_muvi_ant( &my_world, 0, 0, 0 );
 
-	printf( "I am happy say you that: Make the Word of Ants complete!\n" );
+	printf( "I am happy say you that: Make the World of Ants complete!\n" );
 	return 0;
 }
 
