@@ -41,4 +41,6 @@ void wd_of_ants_destroy( void );
 void wd_of_ants_run( void );
 
 
+#define TIMEQUANT 0.01 /* (Sec) Quant of simulation time. */
+
 #endif /* WD_OF_ANTS_H_ */

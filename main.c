@@ -44,6 +44,11 @@ int main( int argc, char ** argv )
 	/* Chek all data and run world */
 	wd_of_ants_init();
 
+	while( 1 )
+	{
+		wd_of_ants_run();
+	}
+
 	wd_of_ants_destroy();
 
 	return 0;
