@@ -2,20 +2,23 @@
 CC = gcc
 LD = ld
 
-#CFLAGS += -Wall -O2
-CFLAGS += -O2
+#CFLAGS += -Wall -O2 `sdl-config --cflags`
+CFLAGS += -O2 `sdl-config --cflags`
 
-LIBS = -lm
+LIBS = -lm `sdl-config --libs`
 
 
 
 all: sima
 
-sima: main.o wd_of_ants.o
-	$(CC) -o sima main.o wd_of_ants.o $(CFLAGS) $(LDFLAGS) $(LIBS)
+sima: main.o wd_of_ants.o wd_gui.o
+	$(CC) -o sima main.o wd_of_ants.o wd_gui.o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c -o main.o main.c
+
+wd_gui.o: wd_gui.c
+	$(CC) $(CFLAGS) -c -o wd_gui.o wd_gui.c
 
 wd_of_ants.o: wd_of_ants.c
 	$(CC) $(CFLAGS) -c -o wd_of_ants.o wd_of_ants.c
@@ -24,4 +27,4 @@ wd_of_ants.o: wd_of_ants.c
 
 
 clean:
-	rm -Rf *.o; rm sima
+	rm -Rf *.o; rm -Rf sima

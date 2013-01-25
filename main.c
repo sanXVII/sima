@@ -4,6 +4,8 @@
 #include <errno.h>
 
 #include "wd_of_ants.h"
+#include "wd_gui.h"
+
 
 
 static void print_usage( const char * prog )
@@ -43,7 +45,8 @@ int main( int argc, char ** argv )
 
 	/* Chek all data and run world */
 	wd_of_ants_init();
-
+	init_gui();
+	
 	while( 1 )
 	{
 		wd_of_ants_run();
