@@ -6,9 +6,11 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 
 
@@ -22,6 +24,31 @@ static pthread_attr_t gui_pthread_attr;
 #define HEIGHT 480
 #define BPP 4
 #define DEPTH 32
+
+void WriteText( SDL_Surface * screen, int x, int y, char text[100], int sz, int r, int g, int b)
+{
+    SDL_Color clr; // Тип для цвета. 4 числа — R, G, B и A, соответственно.
+    clr.r = r; 
+    clr.g = g;  // Зададим параметры цвета
+    clr.b = b;
+
+    // Загружаем шрифт по заданному адресу размером sz
+    TTF_Font * fnt = TTF_OpenFont("./kelson/kelson_sans_regular.ttf", sz);
+    assert( fnt );
+
+    SDL_Rect dest;
+    dest.x = x;
+    dest.y = y;
+
+    // Переносим на поверхность текст с заданным шрифтом и цветом
+    SDL_Surface * TextSurface = TTF_RenderText_Blended( fnt, text, clr );
+    assert( TextSurface );
+
+    SDL_BlitSurface( TextSurface, NULL, screen, &dest );
+    SDL_FreeSurface( TextSurface ); // Освобождаем память уже ненужной поверхности
+    TTF_CloseFont( fnt ); // Закрываем шрифт
+}
+
 
 static void setpixel(SDL_Surface *screen, int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
@@ -53,6 +80,11 @@ static void DrawScreen(SDL_Surface* screen, int h)
         }
     }
 
+	static int cnt = 0; cnt++;
+	char text[ 100 ];
+	sprintf( text, "Hello World %i", cnt );
+	WriteText( screen, 100/* x */, 100/* y */, text, 15/* sz */, 255/* R */, 255/* G */, 255/* B */);
+
     if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   
     SDL_Flip(screen); 
@@ -72,6 +104,13 @@ static void * gui_entry( void * args )
 	fprintf( stderr, "error: SDL init failed\n" );
 	return 0l;
     }
+
+    if( TTF_Init()==-1 ) 
+    {
+    	printf("TTF_Init: %s\n", TTF_GetError());
+    	return 0l;
+    }
+
    
     if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, /*SDL_FULLSCREEN|*/SDL_HWSURFACE)))
     {
@@ -98,6 +137,7 @@ static void * gui_entry( void * args )
          }
     }
 
+    TTF_Quit();
     SDL_Quit();
   
     return 0l;
