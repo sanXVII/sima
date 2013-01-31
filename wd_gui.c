@@ -40,7 +40,7 @@ int nextpoweroftwo(int x)
 
 char *init_sdl(SDL_Surface** screen)
 {
-	if(SDL_Init(SDL_INIT_VIDEO))
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
 		return SDL_GetError();
 	
 	*screen = SDL_SetVideoMode(screenwidth, screenheight, 0, SDL_OPENGL);
@@ -165,6 +165,10 @@ void init_gl()
 	glLoadIdentity();	
 }
 
+
+
+static int done = 0; /* GUI is running while zero. */
+
 static void * gui_entry( void * args )
 {
 	SDL_Surface *screen;
@@ -173,7 +177,6 @@ static void * gui_entry( void * args )
 	SDL_Color color;
 	SDL_Rect position;
 	SDL_Event event;
-	int done;
 	
 	/* Do boring initialization */
 	if((err = init_sdl(&screen))) {
@@ -181,15 +184,14 @@ static void * gui_entry( void * args )
 		return 0l; /* must be returned error code */
 	}
 	
-	if(!(font = TTF_OpenFont(fontpath, 20))) {
+	if(!(font = TTF_OpenFont(fontpath, 19))) {
 		printf("Error loading font: %s", TTF_GetError());
 		return 0l; /* must be returned error code */
 	}
 	
 	init_gl();
 
-	done = 0;
-	while(!done) {
+	while( !done ) {
 		/* render a fun litte quad */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
@@ -220,7 +222,12 @@ static void * gui_entry( void * args )
 		 * rectangle **/
 		position.x = screenwidth / 3;
 		position.y = screenheight / 2;
-		SDL_GL_RenderText("Hello, World!", font, color, &position);
+
+		static int tcnt = 0; tcnt++;
+		char tstr[100];
+		sprintf( tstr, "Hello, World! %i", tcnt );
+
+		SDL_GL_RenderText( tstr, font, color, &position );
 		position.y -= position.h;
 		SDL_GL_RenderText("A line right underneath", font, color, &position);
 		position.y -= position.h;
@@ -231,22 +238,22 @@ static void * gui_entry( void * args )
 		glDisable2D();
 		
 		/* Show the screen */
-		SDL_GL_SwapBuffers( );
+		SDL_GL_SwapBuffers();
 		
-	
-		while(SDL_PollEvent(&event))
-		{
-printf( "SDL EVENT %i\n", event.type ); 
+		while( SDL_PollEvent( &event ))
+		{	
 			switch (event.type)
 			{
 			case SDL_QUIT:
-				done = 1;
+				done++;
 				break;
-			case SDL_KEYDOWN:
-				done = 1;
-				break;
+			//case SDL_KEYDOWN:
+			//	done++;
+			//	break;
 			}
 		}
+
+		SDL_Delay( 30/* ms */ );
 	}
 
 	/* Clean up (the atexit's take care of the rest) */
@@ -270,6 +277,7 @@ int init_gui( void )
 void close_gui( void )
 {
 	/* It called from main thread. */
+	done++;
 
 	void * value;
 	assert( !pthread_join( gui_pthread_id, &value) );
