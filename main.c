@@ -47,10 +47,32 @@ int main( int argc, char ** argv )
 	wd_of_ants_init();
 	init_gui();
 	
+	char cmd[ 100 ];
 	while( 1 )
 	{
-		wd_of_ants_run();
+		printf( "cmd: " );
+		while( scanf( "%s", cmd ) != 1 );
+
+		if( !strcmp( cmd, "h" ) )
+		{
+			printf( "List of supported commands:\n" );
+			printf( "    h - Print help information.\n" );
+			printf( "    q - Quit.\n" );
+			printf( "\n" );
+		}
+		else if( !strcmp( cmd, "q" ) )
+		{
+			break;
+		}
+		else
+		{
+			printf( "Unknown command `%s`. Enter `h` for help.\n\n", cmd );
+		}
+		//wd_of_ants_run();
 	}
+
+	/* Here we must to close all other threads .... */
+	close_gui();
 
 	wd_of_ants_destroy();
 
