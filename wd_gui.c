@@ -27,18 +27,27 @@ static pthread_t gui_pthread_id;
 
 /* adjust these accordingly */
 static char fontpath[] = "./kelson/kelson_sans_light.ttf";
-static int screenwidth = 640;
-static int screenheight = 480;
+static int screenwidth = 800;
+static int screenheight = 700;
+
+static int done = 0; /* GUI is running while zero. */
+
+static float z_4eye = -6.0f; /* Camera position (z) */
+static float vz_4eye = 0.0f; /* */
 
 
-int nextpoweroftwo(int x)
+
+
+
+
+
+static int nextpoweroftwo(int x)
 {
 	double logbase2 = log(x) / log(2);
-
 	return ( int )( pow(2,ceil(logbase2)) + 0.5 );
 }
 
-char *init_sdl(SDL_Surface** screen)
+static char *init_sdl(SDL_Surface** screen)
 {
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
 		return SDL_GetError();
@@ -53,7 +62,7 @@ char *init_sdl(SDL_Surface** screen)
 	return 0;
 }
 
-void SDL_GL_RenderText(char *text, 
+static void SDL_GL_RenderText(char *text, 
                       TTF_Font *font,
                       SDL_Color color,
                       SDL_Rect *location)
@@ -119,7 +128,7 @@ void SDL_GL_RenderText(char *text,
 	glDeleteTextures(1, &texture);
 }
 
-void glEnable2D()
+static void glEnable2D()
 {
 	int vPort[4];
   
@@ -135,7 +144,7 @@ void glEnable2D()
 	glLoadIdentity();
 }
 
-void glDisable2D()
+static void glDisable2D()
 {
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();   
@@ -143,7 +152,7 @@ void glDisable2D()
 	glPopMatrix();	
 }
 
-void init_gl()
+static void init_gl()
 {
 	/* Irrelevant stuff for this demo */
 	glShadeModel(GL_SMOOTH);
@@ -157,7 +166,7 @@ void init_gl()
 	glEnable(GL_BLEND);
 	
 	/* Required setup stuff */
-	glViewport(0, 0, 800, 600);
+	glViewport(0, 0, screenwidth/*800*/, screenheight /*600*/);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, screenwidth / (float)screenheight, 0.1f, 50.0f);
@@ -167,7 +176,49 @@ void init_gl()
 
 
 
-static int done = 0; /* GUI is running while zero. */
+
+
+
+
+
+static void key_down( SDLKey sym )
+{
+	switch( sym )
+	{
+        	case SDLK_LEFT:
+                	break;
+        	case SDLK_RIGHT:
+        		break;
+        	case SDLK_UP:
+			vz_4eye += 0.05f;
+        		break;
+        	case SDLK_DOWN:
+			vz_4eye -= 0.05f;
+                        break;
+		default:
+			break;
+	}
+}
+
+static void key_up( SDLKey sym )
+{
+	switch( sym )
+	{
+        	case SDLK_LEFT:
+                	break;
+        	case SDLK_RIGHT:
+        		break;
+        	case SDLK_UP:
+			vz_4eye = 0.0f;
+        		break;
+        	case SDLK_DOWN:
+			vz_4eye = 0.0f;
+                        break;
+		default:
+			break;
+	}
+}
+
 
 static void * gui_entry( void * args )
 {
@@ -195,16 +246,43 @@ static void * gui_entry( void * args )
 		/* render a fun litte quad */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, -5.0f);
+
+		z_4eye += vz_4eye;
+		glTranslatef(0.0f, 0.0f, z_4eye);
 		glDisable(GL_TEXTURE_2D);
-		
-		glBegin(GL_QUADS);
-			glNormal3f(0.0f, 0.0f, 1.0f);
-			glColor3f(0.5f, 0.0f, 0.0f); glVertex3f(-1.5f, -1.0f,  1.0f);
-			glColor3f(0.0f, 0.5f, 0.0f); glVertex3f( 1.0f, -2.0f,  1.0f);
-			glColor3f(0.0f, 0.0f, 0.5f); glVertex3f( 1.5f,  1.0f,  1.0f);
-			glColor3f(0.5f, 0.0f, 0.0f); glVertex3f(-2.0f,  1.0f, -1.0f);
+	
+		int ix, iy;
+		for( iy = 0; iy < 16; iy++ )
+		{
+			for( ix = 0; ix < 16; ix++ )
+			{
+				if( !( ( ix + iy ) % 2 ) ) continue;
+
+				glBegin(GL_QUADS);
+				glNormal3f(0.0f, 0.0f, 1.0f);
+				glColor3f(0.1f, 0.1f, 0.1f);
+
+				glVertex3f(-0.09f - 1.5 + ix * 0.2, -0.09f - 1.5 + iy * 0.2,  0.0f);
+				glVertex3f(-0.09f - 1.5 + ix * 0.2, 0.09f - 1.5 + iy * 0.2,  0.0f);
+				glVertex3f( 0.09f - 1.5 + ix * 0.2, 0.09f - 1.5 + iy * 0.2,  0.0f);
+				glVertex3f( 0.09f - 1.5 + ix * 0.2, -0.09f - 1.5 + iy * 0.2, 0.0f);
+				glEnd();
+			}
+		}
+
+		glBegin(GL_LINES);
+		glColor3f(1.0f, 0.5f, 0.5f);
+
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(0.1f, 0.0f, 0.0f);
+
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(0.0f, 0.1f, 0.0f);
+
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(0.0f, 0.0f, 0.1f);
 		glEnd();
+
 		
 		/* Go in HUD-drawing mode */
 		glEnable2D();
@@ -246,6 +324,14 @@ static void * gui_entry( void * args )
 			{
 			case SDL_QUIT:
 				done++;
+				break;
+
+			case SDL_KEYDOWN:
+				key_down( event.key.keysym.sym );
+				break;
+
+			case SDL_KEYUP:
+				key_up( event.key.keysym.sym );
 				break;
 			//case SDL_KEYDOWN:
 			//	done++;
