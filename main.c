@@ -71,7 +71,7 @@ int main( int argc, char ** argv )
 		//wd_of_ants_run();
 	}
 
-	/* Here we must to close all other threads .... */
+	/* Here we must to close all other threads ... */
 	close_gui();
 
 	wd_of_ants_destroy();
