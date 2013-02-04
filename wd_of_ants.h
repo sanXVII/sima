@@ -26,9 +26,12 @@ typedef struct wd_of_ants
 {
 	ant * muvis; /* List of muvi ants. */
 
+	unsigned long sim_cnt;
 } wd_of_ants;
 
 
+/* Return pointer to main wd_of_ants structure. */
+wd_of_ants * get_world( void );
 
 /* Prepare of all data structures. */
 int wd_of_ants_init( void );

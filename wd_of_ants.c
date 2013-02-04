@@ -10,6 +10,11 @@
 
 static wd_of_ants my_world;
 
+wd_of_ants * get_world( void )
+{
+	return &my_world;
+}
+
 
 static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 {
@@ -20,7 +25,7 @@ static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->pos_y = y;
 	new->pos_ang = ang;
 	new->tire_radius = 0.1; /* metr */
-	new->axis_len = 0.3; /* metr */
+	new->axis_len = 0.2; /* metr */
 
 	/* Control axis */
 	new->left_speed = 1.0;
@@ -33,6 +38,8 @@ static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 
 int wd_of_ants_init( void )
 {
+	memset( &my_world, 0, sizeof( my_world ) );
+
 	/* My first ant named "Muvi" */
 	add_muvi_ant( &my_world, 0, 0, 0 );
 
@@ -79,5 +86,7 @@ printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
 
 		cant = cant->next;
 	}
+
+	my_world.sim_cnt++;
 }
 

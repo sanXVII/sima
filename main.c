@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "wd_of_ants.h"
 #include "wd_gui.h"
@@ -57,12 +58,22 @@ int main( int argc, char ** argv )
 		{
 			printf( "List of supported commands:\n" );
 			printf( "    h - Print help information.\n" );
+			printf( "    fs - Start fast simulation.\n" );
+			printf( "    rs - Start realtime simulation.\n" );
 			printf( "    q - Quit.\n" );
 			printf( "\n" );
 		}
 		else if( !strcmp( cmd, "q" ) )
 		{
 			break;
+		}
+		else if( !strcmp( cmd, "fs" ) )
+		{
+			while( 1 ) wd_of_ants_run();
+		}
+		else if( !strcmp( cmd, "rs" ) )
+		{
+			while( 1 ) { wd_of_ants_run(); usleep( 10000 ); }
 		}
 		else
 		{

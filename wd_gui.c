@@ -1,4 +1,4 @@
-#include "wd_gui.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +18,9 @@
 #include <math.h>
 
 
+#include "wd_gui.h"
+#include "wd_of_ants.h"
+
 
 /* */
 static pthread_t gui_pthread_id;
@@ -36,7 +39,7 @@ static float z_4eye = -6.0f; /* Camera position (z) */
 static float vz_4eye = 0.0f; /* */
 
 
-
+static wd_of_ants * world;
 
 
 
@@ -283,6 +286,25 @@ static void * gui_entry( void * args )
 		glVertex3f(0.0f, 0.0f, 0.1f);
 		glEnd();
 
+		/* Show ants */
+		ant * cant = world->muvis;
+		while( cant )
+		{
+			glPushMatrix();
+			glTranslatef( cant->pos_x, cant->pos_y, 0.1 );
+			glRotatef( cant->pos_ang * 180 / M_PI, 0.0, 0.0, 1.0 );
+
+			glBegin( GL_LINES );
+			glColor3f( 1.0f, 1.0f, 1.0f );
+			glVertex3f( 0.0, -1 * cant->axis_len / 2, 0.0 );
+			glVertex3f( 0.0, +1 * cant->axis_len / 2, 0.0 );
+			glVertex3f( 0.1, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, 0.0 );
+			
+			glPopMatrix();
+			cant = cant->next;
+		}
+
 		
 		/* Go in HUD-drawing mode */
 		glEnable2D();
@@ -298,12 +320,12 @@ static void * gui_entry( void * args )
 		 * space of most 2D api's. position, therefore,
 		 * gives the X,Y coordinates of the lower-left corner of the
 		 * rectangle **/
-		position.x = screenwidth / 3;
-		position.y = screenheight / 2;
+		position.x = 40;
+		position.y = 60;
 
 		static int tcnt = 0; tcnt++;
 		char tstr[100];
-		sprintf( tstr, "Hello, World! %i", tcnt );
+		sprintf( tstr, "Number of steps: %lu", world->sim_cnt );
 
 		SDL_GL_RenderText( tstr, font, color, &position );
 		position.y -= position.h;
@@ -356,6 +378,8 @@ int init_gui( void )
 {
         //pthread_attr_init( &gui_pthread_attr );
         //pthread_attr_setdetachstate( &gui_pthread_attr, PTHREAD_CREATE_JOINABLE );
+
+	world = get_world();
 
         return pthread_create( &gui_pthread_id, 0L, gui_entry, 0L ); 
 }
