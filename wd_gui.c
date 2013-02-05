@@ -300,6 +300,47 @@ static void * gui_entry( void * args )
 			glVertex3f( 0.0, +1 * cant->axis_len / 2, 0.0 );
 			glVertex3f( 0.1, 0.0, 0.0 );
 			glVertex3f( 0.0, 0.0, 0.0 );
+			glEnd();
+
+			/* Tyres */
+			glPushMatrix();
+			glTranslatef( 0.0, -1 * cant->axis_len / 2, 0.0 );
+			glRotatef( cant->right_angle * 180 / M_PI, 0.0, 1.0, 0.0 );
+
+			glBegin( GL_LINES );
+			glColor3f( 1.0f, 0.0f, 0.0f );
+			glVertex3f( cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, 0.0 );
+			glEnd();
+
+			glBegin( GL_LINE_LOOP );
+			glColor3f( 0.7f, 0.7f, 0.7f );
+			glVertex3f( cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, cant->tire_radius );
+			glVertex3f( -1 * cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, -1 * cant->tire_radius );
+			glEnd();
+
+			glPopMatrix();
+
+			glPushMatrix();
+			glTranslatef( 0.0, cant->axis_len / 2, 0.0 );
+			glRotatef( cant->left_angle * 180 / M_PI, 0.0, 1.0, 0.0 );
+
+			glBegin( GL_LINES );
+			glColor3f( 1.0f, 0.0f, 0.0f );
+			glVertex3f( cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, 0.0 );
+			glEnd();
+
+			glBegin( GL_LINE_LOOP );
+			glColor3f( 0.7f, 0.7f, 0.7f );
+			glVertex3f( cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, cant->tire_radius );
+			glVertex3f( -1 * cant->tire_radius, 0.0, 0.0 );
+			glVertex3f( 0.0, 0.0, -1 * cant->tire_radius );
+			glEnd();
+			glPopMatrix();
 			
 			glPopMatrix();
 			cant = cant->next;

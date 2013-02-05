@@ -28,8 +28,8 @@ static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->axis_len = 0.2; /* metr */
 
 	/* Control axis */
-	new->left_speed = 1.0;
-	new->right_speed = 1.2;
+	new->left_speed = 3.0;
+	new->right_speed = 5.2;
 	
 	new->next = wd->muvis;
 	wd->muvis = new;
