@@ -11,8 +11,8 @@ LIBS = -lm `sdl-config --libs` -lSDL_ttf -lGL -lGLU
 
 all: sima
 
-sima: main.o wd_of_ants.o wd_gui.o
-	$(CC) -o sima main.o wd_of_ants.o wd_gui.o $(CFLAGS) $(LDFLAGS) $(LIBS)
+sima: main.o wd_of_ants.o wd_gui.o sim_drv.o
+	$(CC) -o sima main.o wd_of_ants.o wd_gui.o sim_drv.o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c -o main.o main.c
@@ -23,6 +23,8 @@ wd_gui.o: wd_gui.c
 wd_of_ants.o: wd_of_ants.c
 	$(CC) $(CFLAGS) -c -o wd_of_ants.o wd_of_ants.c
 
+sim_drv.o: sim_drv.c
+	$(CC) $(CFLAGS) -c -o sim_drv.o sim_drv.c
 
 
 
