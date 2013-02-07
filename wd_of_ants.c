@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "wd_of_ants.h"
+#include "sim_drv.h"
 
 
 
@@ -16,9 +18,11 @@ wd_of_ants * get_world( void )
 }
 
 
-static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
+static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 {
 	ant * new = ( ant * )malloc( sizeof( struct ant ) );
+	assert( new );
+
 	memset( new, 0, sizeof( struct ant ) );	
 	
 	new->pos_x = x;
@@ -33,6 +37,8 @@ static void add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	
 	new->next = wd->muvis;
 	wd->muvis = new;
+
+	return new;
 }
 
 
@@ -40,8 +46,9 @@ int wd_of_ants_init( void )
 {
 	memset( &my_world, 0, sizeof( my_world ) );
 
-	/* My first ant named "Muvi" */
-	add_muvi_ant( &my_world, 0, 0, 0 );
+	/* My first ant named "Muvi. And simple driver. */
+	ant * first_ant = add_muvi_ant( &my_world, 0, 0, 0 );
+	add_sim_drv( &my_world, first_ant );
 
 	printf( "I am happy say you that: Make the World of Ants complete!\n" );
 	return 0;
@@ -49,6 +56,8 @@ int wd_of_ants_init( void )
 
 void wd_of_ants_destroy( void )
 {
+	close_sim_drv();
+
 	/* Deletion of muvi ants */
 	ant * cant = my_world.muvis;
 	while( cant )
@@ -61,6 +70,9 @@ void wd_of_ants_destroy( void )
 
 void wd_of_ants_run( void )
 {
+	/* Driving of ants. */
+	exec_sim_drv();
+
 	/* Time forward. Calculate new positions for ants. */
 	ant * cant = my_world.muvis;
 	while( cant )
@@ -88,5 +100,17 @@ printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
 	}
 
 	my_world.sim_cnt++;
+}
+
+
+
+int get_next_task( task * pt, ant * pa, wd_of_ants * wd )
+{
+	pt->status = 1/* new */;
+	pt->tg_x = ( float )( rand() % 100 ) / 30.0;
+	pt->tg_y = ( float )( rand() % 100 ) / 30.0;
+	pt->tg_ang = ( float )( rand() % 100 ) / 30.0;
+
+	return 0;
 }
 

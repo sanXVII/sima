@@ -7,16 +7,13 @@
  *
  */
 
-
-/* This is only padding. */
-struct ant;
-struct wd_of_ants;
-
+#include "wd_of_ants.h"
 
 typedef struct sim_drv
 {
 	struct ant * the_ant;
 	struct wd_of_ants * world;
+	struct task tg_action;
 
 	struct sim_drv * next;
 } sim_drv;
