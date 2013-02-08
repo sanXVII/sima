@@ -19,6 +19,9 @@ typedef struct sim_drv
 } sim_drv;
 
 
+/* Get full chain of simple drivers. */
+sim_drv * all_simple_drivers( void );
+
 /* Add simple driver for one ant. */
 void add_sim_drv( struct wd_of_ants * world, struct ant * c_ant );
 

@@ -11,6 +11,11 @@
 /* Chain of simple drivers. */
 static sim_drv * drivers = 0l;
 
+sim_drv * all_simple_drivers( void )
+{
+	return drivers;
+}
+
 
 void add_sim_drv( wd_of_ants * world, ant * c_ant )
 {

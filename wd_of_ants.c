@@ -94,7 +94,7 @@ void wd_of_ants_run( void )
 		cant->pos_y += sin( cant->pos_ang ) * move;
 
 		cant->pos_ang += asin( ( rmove - lmove ) / cant->axis_len );
-printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
+//printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
 
 		cant = cant->next;
 	}
