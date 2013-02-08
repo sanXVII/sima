@@ -7,13 +7,13 @@
  *
  */
 
-#include "wd_of_ants.h"
+#include "ant_furer.h"
 
 typedef struct sim_drv
 {
 	struct ant * the_ant;
 	struct wd_of_ants * world;
-	struct task tg_action;
+	struct task act_task;
 
 	struct sim_drv * next;
 } sim_drv;

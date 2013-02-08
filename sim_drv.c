@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 
 #include "sim_drv.h"
@@ -34,9 +35,9 @@ void exec_sim_drv( void )
 	while( drv )
 	{
 		/* Check for task. */
-		if( !drv->tg_action.status )
+		if( !drv->act_task.status )
 		{
-			get_next_task( &( drv->tg_action ), 
+			get_next_task( &( drv->act_task ), 
 					drv->the_ant, drv->world );
 		}
 

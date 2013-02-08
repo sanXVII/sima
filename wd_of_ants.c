@@ -102,15 +102,3 @@ printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
 	my_world.sim_cnt++;
 }
 
-
-
-int get_next_task( task * pt, ant * pa, wd_of_ants * wd )
-{
-	pt->status = 1/* new */;
-	pt->tg_x = ( float )( rand() % 100 ) / 30.0;
-	pt->tg_y = ( float )( rand() % 100 ) / 30.0;
-	pt->tg_ang = ( float )( rand() % 100 ) / 30.0;
-
-	return 0;
-}
-
