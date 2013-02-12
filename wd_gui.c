@@ -20,6 +20,8 @@
 
 #include "wd_gui.h"
 #include "wd_of_ants.h"
+#include "sim_drv.h"
+#include "ant_furer.h"
 
 
 /* */
@@ -273,18 +275,18 @@ static void * gui_entry( void * args )
 			}
 		}
 
-		glBegin(GL_LINES);
-		glColor3f(1.0f, 0.5f, 0.5f);
+		//glBegin(GL_LINES);
+		//glColor3f(1.0f, 0.5f, 0.5f);
 
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.1f, 0.0f, 0.0f);
+		//glVertex3f(0.0f, 0.0f, 0.0f);
+		//glVertex3f(0.1f, 0.0f, 0.0f);
 
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.1f, 0.0f);
+		//glVertex3f(0.0f, 0.0f, 0.0f);
+		//glVertex3f(0.0f, 0.1f, 0.0f);
 
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, 0.1f);
-		glEnd();
+		//glVertex3f(0.0f, 0.0f, 0.0f);
+		//glVertex3f(0.0f, 0.0f, 0.1f);
+		//glEnd();
 
 		/* Show ants */
 		ant * cant = world->muvis;
@@ -345,6 +347,30 @@ static void * gui_entry( void * args )
 			glPopMatrix();
 			cant = cant->next;
 		}
+
+		/* Show simple drivers on board. */
+		sim_drv * sdrv = all_simple_drivers();
+		while( sdrv )
+		{
+			if( sdrv->act_task.status )
+			{
+				glPushMatrix();
+				glTranslatef( sdrv->act_task.tg_x, sdrv->act_task.tg_y, 0.0 );
+				glRotatef( sdrv->act_task.tg_ang * 180 / M_PI, 0.0, 0.0, 1.0 );
+
+				glBegin( GL_LINES );
+				glColor3f( 1.0f, 0.7f, 0.7f );
+				glVertex3f( -0.2, 0.0, 0.0 );
+				glVertex3f( 0.1, 0.0, 0.0 );
+				glVertex3f( 0.0, -0.1, 0.0 );
+				glVertex3f( 0.0, 0.1, 0.0 );
+				glEnd();
+
+				glPopMatrix();
+			}
+			sdrv = sdrv->next;
+		}
+
 
 		
 		/* Go in HUD-drawing mode */
