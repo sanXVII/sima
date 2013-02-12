@@ -9,6 +9,24 @@
 
 #include "ant_furer.h"
 
+
+/* Segment of cubic spline.*/
+typedef struct sp3_seg
+{
+	float begin_x;
+	float begin_dx;
+	float end_x;
+	float end_dx;
+	float bx[4];
+
+	float begin_y;
+	float begin_dy;
+	float end_y;
+	float end_dy;
+	float by[4];	
+
+} sp3_seg;
+
 typedef struct sim_drv
 {
 	struct ant * the_ant;
