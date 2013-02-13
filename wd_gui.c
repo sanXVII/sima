@@ -367,6 +367,19 @@ static void * gui_entry( void * args )
 				glEnd();
 
 				glPopMatrix();
+
+				glBegin( GL_LINE_STRIP );
+				glColor3f( 0.7f, 0.7f, 0.7f );
+				float t;
+				for( t = 0.0; t < 1.0; t += 0.05 )
+				{
+					glVertex3f( sdrv->trace.bx[0] + sdrv->trace.bx[1]*t +
+						sdrv->trace.bx[2]*t*t + sdrv->trace.bx[3]*t*t*t, 
+						sdrv->trace.by[0] + sdrv->trace.by[1]*t +
+						sdrv->trace.by[2]*t*t + sdrv->trace.by[3]*t*t*t, 
+						0.0 );
+				}
+				glEnd();
 			}
 			sdrv = sdrv->next;
 		}

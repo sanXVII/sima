@@ -33,6 +33,8 @@ typedef struct sim_drv
 	struct wd_of_ants * world;
 	struct task act_task;
 
+	struct sp3_seg trace;
+
 	struct sim_drv * next;
 } sim_drv;
 
