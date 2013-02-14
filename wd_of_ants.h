@@ -16,6 +16,8 @@ typedef struct ant
 	
 	float axis_len; /* Width of this ant. (metr) */
 	float tire_radius; /* (metr) */
+
+	float corr_turn;
 	
 	struct ant * next;
 } ant;

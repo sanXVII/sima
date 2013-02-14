@@ -23,7 +23,9 @@ typedef struct sp3_seg
 	float begin_dy;
 	float end_y;
 	float end_dy;
-	float by[4];	
+	float by[4];
+
+	float len;	
 
 } sp3_seg;
 
@@ -34,6 +36,7 @@ typedef struct sim_drv
 	struct task act_task;
 
 	struct sp3_seg trace;
+	float now_t; /* Position on segment [0.0 .. 1.0). */
 
 	struct sim_drv * next;
 } sim_drv;

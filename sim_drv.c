@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 
 #include "sim_drv.h"
@@ -77,11 +78,34 @@ static int cc = 0; cc++;
 			make_sp3_seg( &( drv->trace ), 
 				drv->the_ant->pos_x, drv->the_ant->pos_y, drv->the_ant->pos_ang,
 				drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
+			drv->now_t = 0.0; /* begin o spline */
 		}
 
 		/* Test route */
 
-		/* Rule */
+		/* Find the error vector. */
+		float ex = drv->trace.bx[0] + drv->trace.bx[1] * drv->now_t +
+				drv->trace.bx[2] * drv->now_t * drv->now_t + 
+				drv->trace.bx[3] * drv->now_t * drv->now_t * drv->now_t;
+		float ey = drv->trace.by[0] + drv->trace.by[1] * drv->now_t +
+				drv->trace.by[2] * drv->now_t * drv->now_t + 
+				drv->trace.by[3] * drv->now_t * drv->now_t * drv->now_t;
+		ex -= drv->the_ant->pos_x;
+		ey -= drv->the_ant->pos_y;
+
+		drv->the_ant->corr_turn = ex * sin( drv->the_ant->pos_ang * (-1) ) +  
+				ey * cos( drv->the_ant->pos_ang * (-1) );
+		/* correct > 0 : rule to left   */
+		/* correct < 0 : rule to right  */
+		
+
+		/* Move out */
+		drv->now_t += 0.003;
+
+		
+		/* Rule. */
+		drv->the_ant->left_speed = 4.0 - drv->the_ant->corr_turn * 25;
+		drv->the_ant->right_speed = 4.0 + drv->the_ant->corr_turn * 25;
 		
 		drv = drv->next;
 	}
