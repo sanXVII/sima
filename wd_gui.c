@@ -384,6 +384,20 @@ static void * gui_entry( void * args )
 						0.0 );
 				}
 				glEnd();
+
+				t = sdrv->now_t;
+				float tx = sdrv->trace.bx[0] + sdrv->trace.bx[1]*t +
+					sdrv->trace.bx[2]*t*t + sdrv->trace.bx[3]*t*t*t;
+				float ty = sdrv->trace.by[0] + sdrv->trace.by[1]*t +
+					sdrv->trace.by[2]*t*t + sdrv->trace.by[3]*t*t*t;
+
+				glBegin( GL_LINES );
+				glColor3f( 1.0f, 0.7f, 0.7f );
+				glVertex3f( tx - 0.05, ty - 0.05, 0.0 );
+				glVertex3f( tx + 0.05, ty + 0.05, 0.0 );
+				glVertex3f( tx - 0.05, ty + 0.05, 0.0 );
+				glVertex3f( tx + 0.05, ty - 0.05, 0.0 );
+				glEnd();
 			}
 			sdrv = sdrv->next;
 		}

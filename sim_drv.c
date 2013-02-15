@@ -69,8 +69,7 @@ void exec_sim_drv( void )
 	while( drv )
 	{
 		/* Check for task. */
-static int cc = 0; cc++;
-		if( ( !drv->act_task.status ) || !( cc % 500 ) )
+		if( ( !drv->act_task.status ) || ( drv->now_t >= 1.0 ) )
 		{
 			get_next_task( &( drv->act_task ), 
 					drv->the_ant, drv->world );
@@ -82,6 +81,7 @@ static int cc = 0; cc++;
 		}
 
 		/* Test route */
+
 
 		/* Find the error vector. */
 		float ex = drv->trace.bx[0] + drv->trace.bx[1] * drv->now_t +
@@ -95,17 +95,28 @@ static int cc = 0; cc++;
 
 		drv->the_ant->corr_turn = ex * sin( drv->the_ant->pos_ang * (-1) ) +  
 				ey * cos( drv->the_ant->pos_ang * (-1) );
-		/* correct > 0 : rule to left   */
-		/* correct < 0 : rule to right  */
+		float mov = ex * cos( drv->the_ant->pos_ang * (-1) ) -
+				ey * sin( drv->the_ant->pos_ang * (-1) );
+		//mov -= 0.01; /* */
 		
+		/* Rule. */
+		drv->the_ant->left_speed = mov * 400.0;
+		drv->the_ant->right_speed = mov * 400.0;
+
+		if( mov > 0.0 )
+		{
+			drv->the_ant->left_speed -= drv->the_ant->corr_turn * 400.0;
+			drv->the_ant->right_speed += drv->the_ant->corr_turn * 400.0;
+		}
+		else
+		{
+			drv->the_ant->left_speed += drv->the_ant->corr_turn * 400.0;
+			drv->the_ant->right_speed -= drv->the_ant->corr_turn * 400.0;
+		}
+
 
 		/* Move out */
 		drv->now_t += 0.003;
-
-		
-		/* Rule. */
-		drv->the_ant->left_speed = 4.0 - drv->the_ant->corr_turn * 25;
-		drv->the_ant->right_speed = 4.0 + drv->the_ant->corr_turn * 25;
 		
 		drv = drv->next;
 	}
