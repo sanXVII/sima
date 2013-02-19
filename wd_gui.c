@@ -303,9 +303,6 @@ static void * gui_entry( void * args )
 			glVertex3f( 0.1, 0.0, 0.0 );
 			glVertex3f( 0.0, 0.0, 0.0 );
 
-			glColor3f( 0.1f, 0.5f, 0.5f );
-			glVertex3f( 0.0, cant->corr_turn, 0.0 );
-			glVertex3f( 0.0, 0.0, 0.0 );
 			glEnd();
 
 			/* Tyres */

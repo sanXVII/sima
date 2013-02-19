@@ -32,8 +32,8 @@ static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->axis_len = 0.2; /* metr */
 
 	/* Control axis */
-	new->left_speed = 3.0;
-	new->right_speed = 5.2;
+	new->left_speed = 0.0;
+	new->right_speed = 0.0;
 	
 	new->next = wd->muvis;
 	wd->muvis = new;
@@ -93,9 +93,15 @@ void wd_of_ants_run( void )
 		cant->pos_x += cos( cant->pos_ang ) * move;
 		cant->pos_y += sin( cant->pos_ang ) * move;
 
-		cant->pos_ang += asin( ( rmove - lmove ) / cant->axis_len );
+		cant->pos_ang += ( rmove - lmove ) / cant->axis_len;
+//printf( "( rmove - lmove ) / cant->axis_len =%f\n", ( rmove - lmove ) / cant->axis_len );
 //printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
-
+if( ( rand() % 1000 ) > 998 )
+{
+	cant->pos_x += 0.01;
+	cant->pos_y += 0.01;
+	cant->pos_ang += (float)( rand() % 1000 ) / 1000.0;
+}
 		cant = cant->next;
 	}
 
