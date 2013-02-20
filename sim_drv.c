@@ -101,17 +101,27 @@ void exec_sim_drv( void )
 		float mov = ex * cos( drv->the_ant->pos_ang * (-1) ) -
 				ey * sin( drv->the_ant->pos_ang * (-1) );
 
-		corr_turn *= corr_turn;
-		mov *= mov;
+		if( corr_turn < 0.0 )
+		{
+			corr_turn *= (-1) * corr_turn;
+		}
+		else
+		{
+			corr_turn *= corr_turn;
+		}
+
+		/* Lag correction value. */
+		mov = mov < -1.0 ? -1.0 : mov;
+		mov += 1.0;
 		
-		/* Correction of trajectory. */
-		drv->the_ant->left_speed = mov * 2000.0;
-		drv->the_ant->right_speed = mov * 2000.0;
+		drv->the_ant->left_speed = 0.0;
+		drv->the_ant->right_speed = 0.0;
 
-		drv->the_ant->left_speed -= corr_turn * 2000.0;
-		drv->the_ant->right_speed += corr_turn * 2000.0;
+		/* Offset correction turn. */
+		drv->the_ant->left_speed -= corr_turn * 500.0;
+		drv->the_ant->right_speed += corr_turn * 500.0;
 
-printf( "Correction control: left_w=%f .. right_w=%f\n", drv->the_ant->left_speed, drv->the_ant->right_speed );
+printf( "Correction control: left_w=%f .. right_w=%f .. mov = %f", drv->the_ant->left_speed, drv->the_ant->right_speed, mov );
 
 		/* Major control. */
 		float now_dx = drv->trace.bx[1] + 2 * drv->trace.bx[2] * drv->now_t + 
@@ -121,6 +131,17 @@ printf( "Correction control: left_w=%f .. right_w=%f\n", drv->the_ant->left_spee
 			3 * drv->trace.by[3] * drv->now_t * drv->now_t;
 
 		float now_norm = sqrt( now_dx * now_dx + now_dy * now_dy );
+
+		float c_angle = asin( now_dy / now_norm );
+		c_angle = now_dx < 0.0 ? M_PI - c_angle : c_angle;
+		c_angle -= drv->the_ant->pos_ang;
+		c_angle = sin( c_angle );
+
+		/* Angle correction turn. */
+		drv->the_ant->left_speed -= c_angle;
+		drv->the_ant->right_speed += c_angle;
+printf( ".. sin( c_angle ) =%f\n", c_angle );
+
 		now_norm = 1.0 / now_norm;
 		
 		now_dx *= now_norm * ( drv->the_ant->axis_len / 2.0 );
@@ -152,7 +173,7 @@ printf( "Correction control: left_w=%f .. right_w=%f\n", drv->the_ant->left_spee
 		next_y -= now_y;
 
 		float left_mov, right_mov;
-		left_mov = right_mov = sqrt( next_x * next_x + next_y * next_y );
+		left_mov = right_mov = sqrt( next_x * next_x + next_y * next_y ) * mov;
 
 		next_dx -= now_dx;
 		next_dy -= now_dy;
@@ -172,8 +193,8 @@ printf( "Correction control: left_w=%f .. right_w=%f\n", drv->the_ant->left_spee
 		left_mov /= drv->the_ant->tire_radius;
 		right_mov /= drv->the_ant->tire_radius;
 
-		//drv->the_ant->left_speed += left_mov / TIMEQUANT;
-		//drv->the_ant->right_speed += right_mov / TIMEQUANT;
+		drv->the_ant->left_speed += left_mov / TIMEQUANT;
+		drv->the_ant->right_speed += right_mov / TIMEQUANT;
 		drv = drv->next;
 	}
 }
