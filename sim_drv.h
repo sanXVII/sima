@@ -29,6 +29,29 @@ typedef struct sp3_seg
 
 } sp3_seg;
 
+/* Algorithm A* */
+typedef struct astar_n
+{
+	int x;
+	int y;
+	int state;
+
+	float g;
+	float h;
+	float f;
+
+	struct astar_n * near_f;
+	struct astar_n * near_l;
+	struct astar_n * near_r;
+	struct astar_n * near_b;
+
+	struct astar_n * parent;
+} astar_n;
+
+#define ASTAR_SQUARE (0.1)    /* Metr */
+#define ASTAR_DIAGONAL (0.14) /* Metr */
+
+
 typedef struct sim_drv
 {
 	struct ant * the_ant;
