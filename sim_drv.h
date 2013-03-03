@@ -8,6 +8,7 @@
  */
 
 #include "ant_furer.h"
+#include "astar.h"
 
 
 /* Segment of cubic spline.*/
@@ -38,6 +39,8 @@ typedef struct sim_drv
 
 	struct sp3_seg trace;
 	float now_t; /* Position on segment [0.0 .. 1.0). */
+
+	struct astar * a_star;
 
 	struct sim_drv * next;
 } sim_drv;

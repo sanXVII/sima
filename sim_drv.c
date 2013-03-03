@@ -32,6 +32,8 @@ void add_sim_drv( wd_of_ants * world, ant * c_ant )
 
 	new->next = drivers;
 	drivers = new;
+
+	new->a_star = new_astar();
 }
 
 
@@ -207,8 +209,9 @@ void close_sim_drv( void )
 	while( cur_drv )
 	{
 		sim_drv * t_drv = cur_drv;
-
 		cur_drv = cur_drv->next;
+
+		delete_astar( t_drv->a_star );
 		free( t_drv );
 	}
 }

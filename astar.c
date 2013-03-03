@@ -22,8 +22,13 @@ static void add_new_block( astar * ad )
 	ad->cur_blk->next = new;
 
 	/* Reallocate heap array */
+	astar_n ** nh = ( astar_n ** )malloc(
+		sizeof( astar_n * ) * ad->nblk_cnt * ASTAR_NBLOCK_SZ );
+	assert( nh );
 
-	/***********************/
+	memcpy( nh, ad->opens_heap, sizeof( astar_n * ) * ad->opens_num );
+	free( ad->opens_heap );
+	ad->opens_heap = nh;
 }
 
 
@@ -54,11 +59,17 @@ astar * new_astar( void )
 	new->cur_blk = &( new->first_blk );
 	new->nblk_cnt = 1/* first block */;
 
+	new->opens_heap = ( astar_n ** )malloc( 
+		sizeof( astar_n * ) * new->nblk_cnt * ASTAR_NBLOCK_SZ );
+	assert( new->opens_heap );
+
 	return new;
 }
 
 void delete_astar( astar * ad )
 {
+	free( ad->opens_heap );
+
 	astar_nblock * cb = ad->first_blk.next;
 	while( cb )
 	{

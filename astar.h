@@ -29,11 +29,14 @@ typedef struct astar_nblock
 	astar_n node[ ASTAR_NBLOCK_SZ ];
 
 	struct astar_nblock * next;
-} astart_nblock;
+} astar_nblock;
 
 typedef struct astar
 {
 	int n_use_num; /* Num of used nodes */
+
+	astar_n ** opens_heap;
+	int opens_num;
 
 	/* Scalable list of nodes */
 	astar_nblock * cur_blk;   /* Last used block */
