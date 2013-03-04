@@ -55,4 +55,13 @@ astar * new_astar( void );
 void delete_astar( astar * );
 
 
+/* Target at a distance of N steps forward. Find route.
+ *
+ * Return exec code.
+ *    0 - OK
+ *   -1 - fail
+ */
+int make_astar( astar * ad, int len );
+
+
 #endif /* ASTAR_H_ */

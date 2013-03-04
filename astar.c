@@ -46,6 +46,7 @@ static astar_n * get_new_node( astar * ad )
 		ad->cur_blk = ad->cur_blk->next;
 	}
 
+	memset( ret, 0, sizeof( astar_n ) );
 	return ret;
 }
 
@@ -79,5 +80,34 @@ void delete_astar( astar * ad )
 		free( kill );
 	}
 	free( ad );
+}
+
+
+
+static void add_to_heap( astar * ad, astar_n * node )
+{
+}
+
+int make_astar( astar * ad, int len )
+{
+	/* Clear previus route. */
+	ad->n_use_num = 0;
+	ad->opens_num = 0;
+	ad->cur_blk = &( ad->first_blk );
+	
+	/* Mark first node. */
+	astar_n * s = get_new_node( ad );
+
+	s->g = 0.0;
+	s->h = ( float )len;
+	s->f = s->g + s->h;
+
+	add_to_heap( ad, s );
+
+	while( ad->opens_num )
+	{
+	}
+	
+	return 0;
 }
 
