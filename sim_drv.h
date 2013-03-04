@@ -8,28 +8,18 @@
  */
 
 #include "ant_furer.h"
-#include "astar.h"
 
 
 /* Segment of cubic spline.*/
 typedef struct sp3_seg
 {
-	float begin_x;
-	float begin_dx;
-	float end_x;
-	float end_dx;
 	float bx[4];
-
-	float begin_y;
-	float begin_dy;
-	float end_y;
-	float end_dy;
 	float by[4];
 
 	float len;	
-
 } sp3_seg;
 
+#define MAX_SP3 10
 
 typedef struct sim_drv
 {
@@ -37,7 +27,10 @@ typedef struct sim_drv
 	struct wd_of_ants * world;
 	struct task act_task;
 
-	struct sp3_seg trace;
+	int sp3_num; /* Number of segmant */
+	struct sp3_seg trace[ MAX_SP3 ];
+	
+	int cur_sp3; /* Current segment */
 	float now_t; /* Position on segment [0.0 .. 1.0). */
 
 	struct astar * a_star;
