@@ -7,7 +7,7 @@ typedef struct astar_n
 {
         int x;
         int y;
-        int state;
+        int state; /* 0-new, 1-open, 2-close */
 	int heap_id;
 
         float g;

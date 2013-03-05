@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 
 #include "astar.h"
 
@@ -88,6 +89,29 @@ static void add_to_heap( astar * ad, astar_n * node )
 {
 }
 
+static astar_n * cut_heap_head( astar * ad )
+{
+	return 0l; /* 0l if empty */
+}
+
+static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost )
+{
+	/* Check for borders from parent to child ---------- */
+
+	float newg = cost + parent->g;
+	if( child->state && ( child->g <= newg ) )
+	{
+		return;
+	}
+
+	child->parent = parent;
+	child->g = newg;
+	child->h = sqrt( ( child->x - parent->x ) * ( child->x - parent->x ) +
+			( child->y - parent->y ) * ( child->y - parent->y ) );
+	child->f = child->g + child->h;
+	add_to_heap( ad, child );
+}
+
 int make_astar( astar * ad, int len )
 {
 	/* Clear previus route. */
@@ -104,10 +128,82 @@ int make_astar( astar * ad, int len )
 
 	add_to_heap( ad, s );
 
-	while( ad->opens_num )
+	astar_n * n;
+	while( ( n = cut_heap_head( ad ) ) )
 	{
+		if( ( n->x == 0 ) && ( n->y == len ) )
+		{
+			/* Path found */
+			return 0;
+		}
+
+		/* near left */
+		n->near_l = n->near_l ? n->near_l : get_new_node( ad );
+		n->near_l->near_r = n;
+		n->near_l->x = n->x - 1;
+		n->near_l->y = n->y;
+		check_node( ad, n, n->near_l, ASTAR_SQUARE );
+
+		/* near right */
+		n->near_r = n->near_r ? n->near_r : get_new_node( ad );
+		n->near_r->near_l = n;
+		n->near_r->x = n->x + 1;
+		n->near_r->y = n->y;
+		check_node( ad, n, n->near_r, ASTAR_SQUARE );
+
+		/* near forward */
+		n->near_f = n->near_f ? n->near_f : get_new_node( ad );
+		n->near_f->near_b = n;
+		n->near_f->x = n->x;
+		n->near_f->y = n->y + 1;
+		check_node( ad, n, n->near_f, ASTAR_SQUARE );
+
+		/* near back */
+		n->near_b = n->near_b ? n->near_b : get_new_node( ad );
+		n->near_b->near_f = n;
+		n->near_b->x = n->x;
+		n->near_b->y = n->y - 1;
+		check_node( ad, n, n->near_b, ASTAR_SQUARE );
+
+		astar_n * dn;
+
+		/* near left-forward */
+		dn = n->near_l->near_f;
+		dn = dn ? dn : get_new_node( ad );
+		n->near_l->near_f = dn;
+		n->near_f->near_l = dn;
+		dn->x = n->x - 1;
+		dn->y = n->y + 1;
+		check_node( ad, n, dn, ASTAR_DIAGONAL );
+		
+		/* near right-forward */
+		dn = n->near_r->near_f;
+		dn = dn ? dn : get_new_node( ad );
+		n->near_r->near_f = dn;
+		n->near_f->near_r = dn;
+		dn->x = n->x + 1;
+		dn->y = n->y + 1;
+		check_node( ad, n, dn, ASTAR_DIAGONAL );
+
+		/* near right-back */
+		dn = n->near_r->near_b;
+		dn = dn ? dn : get_new_node( ad );
+		n->near_r->near_b = dn;
+		n->near_b->near_r = dn;
+		dn->x = n->x + 1;
+		dn->y = n->y - 1;
+		check_node( ad, n, dn, ASTAR_DIAGONAL );
+
+		/* near left-back */
+		dn = n->near_l->near_b;
+		dn = dn ? dn : get_new_node( ad );
+		n->near_l->near_b = dn;
+		n->near_b->near_l = dn;
+		dn->x = n->x - 1;
+		dn->y = n->y - 1;
+		check_node( ad, n, dn, ASTAR_DIAGONAL );
 	}
 	
-	return 0;
+	return -1; /* A* fail */
 }
 
