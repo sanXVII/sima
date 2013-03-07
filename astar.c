@@ -163,7 +163,7 @@ static void check_node( astar * ad, astar_n * parent, astar_n * child, float cos
 	add_to_heap( ad, child );
 }
 
-int make_astar( astar * ad, int len )
+astar_n * make_astar( astar * ad, int len )
 {
 	/* Clear previus route. */
 	ad->n_use_num = 0;
@@ -190,7 +190,7 @@ int make_astar( astar * ad, int len )
 				n->parent->dao = n;
 				n = n->parent;
 			}
-			return 0;
+			return n;
 		}
 
 		/* near left */
@@ -260,6 +260,6 @@ int make_astar( astar * ad, int len )
 		check_node( ad, n, dn, ASTAR_DIAGONAL );
 	}
 	
-	return -1; /* A* fail */
+	return 0l; /* A* fail */
 }
 
