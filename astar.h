@@ -20,6 +20,7 @@ typedef struct astar_n
         struct astar_n * near_b;
 
         struct astar_n * parent;
+        struct astar_n * dao; /* Founded path */
 } astar_n;
 
 
