@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -114,10 +113,36 @@ static astar_n * cut_heap_head( astar * ad )
 	astar_n * rval = ad->opens_heap[ 0 ];
 	rval->state = 2/* close */;
 	
-	ad->opens_heap[ 0 ] = ad->opens_heap[ ad->opens_num - 1 ];
+	ad->opens_num--;
+	ad->opens_heap[ 0 ] = ad->opens_heap[ ad->opens_num ];
 	ad->opens_heap[ 0 ]->heap_id = 0;
 	
+	int hid = 0;
+	astar_n * head = ad->opens_heap[ 0 ];
+	while( 1 )
+	{
+		int tid = 2 * hid + 1;
+		
+		if( tid >= ad->opens_num ) break;
+		if( ( tid + 1 ) < ad->opens_num )
+		{
+			tid = ( ad->opens_heap[ tid ]->f < 
+				ad->opens_heap[ tid + 1 ]->f ) ? tid : tid + 1;
+		}
+		astar_n * tail = ad->opens_heap[ tid ];
+		if( head->f < tail->f ) break;
+		
+		head->heap_id = tid;
+		tail->heap_id = hid;
+		
+		ad->opens_heap[ hid ] = tail;
+		ad->opens_heap[ tid ] = head;
+		
+		hid = tid;
+		head = tail;
+	}
 	
+	return rval;
 }
 
 static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost )
