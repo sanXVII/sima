@@ -58,11 +58,10 @@ void delete_astar( astar * );
 
 /* Target at a distance of N steps forward. Find route.
  *
- * Return exec code.
- *    0 - OK
- *   -1 - fail
+ * Return pointer to first path node.
+ *   NULL - fail
  */
-int make_astar( astar * ad, int len );
+astar_n * make_astar( astar * ad, int len );
 
 
 #endif /* ASTAR_H_ */
