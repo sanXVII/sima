@@ -185,6 +185,11 @@ int make_astar( astar * ad, int len )
 		if( ( n->x == 0 ) && ( n->y == len ) )
 		{
 			/* Path found */
+			while( n->parent )
+			{
+				n->parent->dao = n;
+				n = n->parent;
+			}
 			return 0;
 		}
 
