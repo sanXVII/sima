@@ -1,5 +1,4 @@
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -85,13 +84,40 @@ void delete_astar( astar * ad )
 
 
 
-static void add_to_heap( astar * ad, astar_n * node )
+static void add_to_heap( astar * ad, astar_n * tail )
 {
+	tail->state = 1/* open */;
+	ad->opens_heap[ ad->opens_num ] = tail;
+	tail->heap_id = ad->opens_num;
+	ad->opens_num++;
+	
+	while( 1 )
+	{
+		int hid = tail->heap_id - 1;
+		hid = hid < 0 ? 0 : hid >> 1;
+		astar_n * head = ad->opens_heap[ hid ];
+		if( head->f <= tail->f ) break;
+		
+		int tid = tail->heap_id;
+		tail->heap_id = hid;
+		head->heap_id = tid;
+		
+		ad->opens_heap[ hid ] = tail;
+		ad->opens_heap[ tid ] = head;
+	}
 }
 
 static astar_n * cut_heap_head( astar * ad )
 {
-	return 0l; /* 0l if empty */
+	if( !ad->opens_num ) return 0l; /* 0l if empty */
+	
+	astar_n * rval = ad->opens_heap[ 0 ];
+	rval->state = 2/* close */;
+	
+	ad->opens_heap[ 0 ] = ad->opens_heap[ ad->opens_num - 1 ];
+	ad->opens_heap[ 0 ]->heap_id = 0;
+	
+	
 }
 
 static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost )
