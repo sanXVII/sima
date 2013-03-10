@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "astar.h"
 
@@ -13,6 +14,7 @@ static void add_new_block( astar * ad )
 	astar_nblock * new = ( astar_nblock * )malloc( sizeof( astar_nblock ) );
 	assert( new );
 	memset( new, 0, sizeof( astar_nblock ) );
+printf( "add_new_block .. \n" );
 	
 	ad->nblk_cnt++;
 
@@ -35,9 +37,11 @@ static astar_n * get_new_node( astar * ad )
 {
 	astar_n * ret = ad->cur_blk->node + ad->n_use_num % ASTAR_NBLOCK_SZ;
 	ad->n_use_num++;
+printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
 
 	if( !( ad->n_use_num % ASTAR_NBLOCK_SZ ) )
 	{
+printf( "!( ad->n_use_num %% ASTAR_NBLOCK_SZ ) .. cur_blk->next=%p\n", ad->cur_blk->next );
 		if( !ad->cur_blk->next )
 		{
 			add_new_block( ad );
@@ -89,7 +93,7 @@ static void add_to_heap( astar * ad, astar_n * tail )
 	ad->opens_heap[ ad->opens_num ] = tail;
 	tail->heap_id = ad->opens_num;
 	ad->opens_num++;
-	
+printf( "add_to_heap %i .. %p\n", ad->opens_num, tail );	
 	while( 1 )
 	{
 		int hid = tail->heap_id - 1;
@@ -145,7 +149,7 @@ static astar_n * cut_heap_head( astar * ad )
 	return rval;
 }
 
-static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost )
+static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost, int len )
 {
 	/* Check for borders from parent to child ---------- */
 
@@ -157,14 +161,15 @@ static void check_node( astar * ad, astar_n * parent, astar_n * child, float cos
 
 	child->parent = parent;
 	child->g = newg;
-	child->h = sqrt( ( child->x - parent->x ) * ( child->x - parent->x ) +
-			( child->y - parent->y ) * ( child->y - parent->y ) );
+	child->h = sqrt( ( child->x - 0 ) * ( child->x - 0 ) +
+			( child->y - len ) * ( child->y - len ) );
 	child->f = child->g + child->h;
 	add_to_heap( ad, child );
 }
 
 astar_n * make_astar( astar * ad, int len )
 {
+printf( "Reset A* ...\n" );
 	/* Clear previus route. */
 	ad->n_use_num = 0;
 	ad->opens_num = 0;
@@ -184,6 +189,7 @@ astar_n * make_astar( astar * ad, int len )
 	{
 		if( ( n->x == 0 ) && ( n->y == len ) )
 		{
+printf( "Path founded! ..\n" );
 			/* Path found */
 			while( n->parent )
 			{
@@ -198,28 +204,28 @@ astar_n * make_astar( astar * ad, int len )
 		n->near_l->near_r = n;
 		n->near_l->x = n->x - 1;
 		n->near_l->y = n->y;
-		check_node( ad, n, n->near_l, ASTAR_SQUARE );
+		check_node( ad, n, n->near_l, ASTAR_SQUARE, len );
 
 		/* near right */
 		n->near_r = n->near_r ? n->near_r : get_new_node( ad );
 		n->near_r->near_l = n;
 		n->near_r->x = n->x + 1;
 		n->near_r->y = n->y;
-		check_node( ad, n, n->near_r, ASTAR_SQUARE );
+		check_node( ad, n, n->near_r, ASTAR_SQUARE, len );
 
 		/* near forward */
 		n->near_f = n->near_f ? n->near_f : get_new_node( ad );
 		n->near_f->near_b = n;
 		n->near_f->x = n->x;
 		n->near_f->y = n->y + 1;
-		check_node( ad, n, n->near_f, ASTAR_SQUARE );
+		check_node( ad, n, n->near_f, ASTAR_SQUARE, len );
 
 		/* near back */
 		n->near_b = n->near_b ? n->near_b : get_new_node( ad );
 		n->near_b->near_f = n;
 		n->near_b->x = n->x;
 		n->near_b->y = n->y - 1;
-		check_node( ad, n, n->near_b, ASTAR_SQUARE );
+		check_node( ad, n, n->near_b, ASTAR_SQUARE, len );
 
 		astar_n * dn;
 
@@ -230,7 +236,7 @@ astar_n * make_astar( astar * ad, int len )
 		n->near_f->near_l = dn;
 		dn->x = n->x - 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL );
+		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
 		
 		/* near right-forward */
 		dn = n->near_r->near_f;
@@ -239,7 +245,7 @@ astar_n * make_astar( astar * ad, int len )
 		n->near_f->near_r = dn;
 		dn->x = n->x + 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL );
+		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
 
 		/* near right-back */
 		dn = n->near_r->near_b;
@@ -248,7 +254,7 @@ astar_n * make_astar( astar * ad, int len )
 		n->near_b->near_r = dn;
 		dn->x = n->x + 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL );
+		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
 
 		/* near left-back */
 		dn = n->near_l->near_b;
@@ -257,7 +263,7 @@ astar_n * make_astar( astar * ad, int len )
 		n->near_b->near_l = dn;
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL );
+		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
 	}
 	
 	return 0l; /* A* fail */
