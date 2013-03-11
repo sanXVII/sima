@@ -37,7 +37,7 @@ static astar_n * get_new_node( astar * ad )
 {
 	astar_n * ret = ad->cur_blk->node + ad->n_use_num % ASTAR_NBLOCK_SZ;
 	ad->n_use_num++;
-printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
+//printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
 
 	if( !( ad->n_use_num % ASTAR_NBLOCK_SZ ) )
 	{
@@ -86,6 +86,24 @@ void delete_astar( astar * ad )
 }
 
 
+static void to_up( astar * ad, astar_n * tail )
+{
+	while( 1 )
+	{
+		int hid = tail->heap_id - 1;
+		hid = hid < 0 ? 0 : hid >> 1;
+		astar_n * head = ad->opens_heap[ hid ];
+		if( head->f <= tail->f ) break;
+
+		int tid = tail->heap_id;
+//printf( "%p <-> %p .. %i <-> %i .. %f <> %f\n", head, tail, hid, tid, head->f, tail->f );	
+		tail->heap_id = hid;
+		head->heap_id = tid;
+		
+		ad->opens_heap[ hid ] = tail;
+		ad->opens_heap[ tid ] = head;
+	}
+}
 
 static void add_to_heap( astar * ad, astar_n * tail )
 {
@@ -93,21 +111,9 @@ static void add_to_heap( astar * ad, astar_n * tail )
 	ad->opens_heap[ ad->opens_num ] = tail;
 	tail->heap_id = ad->opens_num;
 	ad->opens_num++;
-printf( "add_to_heap %i .. %p\n", ad->opens_num, tail );	
-	while( 1 )
-	{
-		int hid = tail->heap_id - 1;
-		hid = hid < 0 ? 0 : hid >> 1;
-		astar_n * head = ad->opens_heap[ hid ];
-		if( head->f <= tail->f ) break;
-		
-		int tid = tail->heap_id;
-		tail->heap_id = hid;
-		head->heap_id = tid;
-		
-		ad->opens_heap[ hid ] = tail;
-		ad->opens_heap[ tid ] = head;
-	}
+//printf( "add_to_heap %i .. %p\n", ad->opens_num, tail );
+
+	to_up( ad, tail );
 }
 
 static astar_n * cut_heap_head( astar * ad )
@@ -152,7 +158,7 @@ static astar_n * cut_heap_head( astar * ad )
 static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost, int len )
 {
 	/* Check for borders from parent to child ---------- */
-
+//printf( "check %p [%i:%i]\n", child, child->x, child->y );
 	float newg = cost + parent->g;
 	if( child->state && ( child->g <= newg ) )
 	{
@@ -161,10 +167,18 @@ static void check_node( astar * ad, astar_n * parent, astar_n * child, float cos
 
 	child->parent = parent;
 	child->g = newg;
-	child->h = sqrt( ( child->x - 0 ) * ( child->x - 0 ) +
-			( child->y - len ) * ( child->y - len ) );
+	child->h = sqrt( ( float )( child->x - 0 ) * ( float )( child->x - 0 ) +
+			( float )( child->y - len ) * ( float )( child->y - len ) );
 	child->f = child->g + child->h;
-	add_to_heap( ad, child );
+
+	if( child->state == 1/*open*/ )
+	{
+		to_up( ad, child );
+	}
+	else
+	{
+		add_to_heap( ad, child );
+	}
 }
 
 astar_n * make_astar( astar * ad, int len )
@@ -181,6 +195,8 @@ printf( "Reset A* ...\n" );
 	s->g = 0.0;
 	s->h = ( float )len;
 	s->f = s->g + s->h;
+	s->x = 0;
+	s->y = 0;
 
 	add_to_heap( ad, s );
 
@@ -232,8 +248,8 @@ printf( "Path founded! ..\n" );
 		/* near left-forward */
 		dn = n->near_l->near_f;
 		dn = dn ? dn : get_new_node( ad );
-		n->near_l->near_f = dn;
-		n->near_f->near_l = dn;
+		n->near_l->near_f = dn; dn->near_b = n->near_l;
+		n->near_f->near_l = dn; dn->near_r = n->near_f;
 		dn->x = n->x - 1;
 		dn->y = n->y + 1;
 		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
@@ -241,8 +257,8 @@ printf( "Path founded! ..\n" );
 		/* near right-forward */
 		dn = n->near_r->near_f;
 		dn = dn ? dn : get_new_node( ad );
-		n->near_r->near_f = dn;
-		n->near_f->near_r = dn;
+		n->near_r->near_f = dn; dn->near_b = n->near_r;
+		n->near_f->near_r = dn; dn->near_l = n->near_f;
 		dn->x = n->x + 1;
 		dn->y = n->y + 1;
 		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
@@ -250,8 +266,8 @@ printf( "Path founded! ..\n" );
 		/* near right-back */
 		dn = n->near_r->near_b;
 		dn = dn ? dn : get_new_node( ad );
-		n->near_r->near_b = dn;
-		n->near_b->near_r = dn;
+		n->near_r->near_b = dn; dn->near_f = n->near_r;
+		n->near_b->near_r = dn; dn->near_l = n->near_b;
 		dn->x = n->x + 1;
 		dn->y = n->y - 1;
 		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
@@ -259,8 +275,8 @@ printf( "Path founded! ..\n" );
 		/* near left-back */
 		dn = n->near_l->near_b;
 		dn = dn ? dn : get_new_node( ad );
-		n->near_l->near_b = dn;
-		n->near_b->near_l = dn;
+		n->near_l->near_b = dn; dn->near_f = n->near_l;
+		n->near_b->near_l = dn; dn->near_r = n->near_b;
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
 		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
