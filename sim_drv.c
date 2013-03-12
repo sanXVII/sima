@@ -101,7 +101,16 @@ static void reset_task( sim_drv * drv )
 	drv->now_t = 0.0; /* begin of spline */
 
 	/* A* */
-	astar_n * route = make_astar( drv->a_star, 50000 );
+	float dist = sqrt( ( ex - bx ) * ( ex - bx ) + ( ey - by ) * ( ey - by ) );
+	astar_n * route = make_astar( drv->a_star, ( int )( dist / ASTEP ) );
+	assert( route ); /* Что делать? */
+
+	/* A* points tranformation matrix */
+	drv->ay_tx = ( ex - bx ) * ASTEP / dist;
+	drv->ay_ty = ( ey - by ) * ASTEP / dist;
+	drv->ax_tx = drv->ay_ty;
+	drv->ax_ty = ( -1.0 ) * drv->ay_tx;
+	
 }
 
 
@@ -261,5 +270,16 @@ void close_sim_drv( void )
 		delete_astar( t_drv->a_star );
 		free( t_drv );
 	}
+}
+
+
+inline float get_x( sim_drv * drv, int astar_x, int astar_y )
+{
+	return drv->ax_tx * ( float )astar_x + drv->ay_tx * ( float )astar_y;
+}
+
+inline float get_y( sim_drv * drv, int astar_x, int astar_y )
+{
+	return drv->ax_ty * ( float )astar_x + drv->ay_ty * ( float )astar_y;
 }
 

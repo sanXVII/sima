@@ -220,28 +220,28 @@ printf( "Path founded! ..\n" );
 		n->near_l->near_r = n;
 		n->near_l->x = n->x - 1;
 		n->near_l->y = n->y;
-		check_node( ad, n, n->near_l, ASTAR_SQUARE, len );
+		check_node( ad, n, n->near_l, 1.0, len );
 
 		/* near right */
 		n->near_r = n->near_r ? n->near_r : get_new_node( ad );
 		n->near_r->near_l = n;
 		n->near_r->x = n->x + 1;
 		n->near_r->y = n->y;
-		check_node( ad, n, n->near_r, ASTAR_SQUARE, len );
+		check_node( ad, n, n->near_r, 1.0, len );
 
 		/* near forward */
 		n->near_f = n->near_f ? n->near_f : get_new_node( ad );
 		n->near_f->near_b = n;
 		n->near_f->x = n->x;
 		n->near_f->y = n->y + 1;
-		check_node( ad, n, n->near_f, ASTAR_SQUARE, len );
+		check_node( ad, n, n->near_f, 1.0, len );
 
 		/* near back */
 		n->near_b = n->near_b ? n->near_b : get_new_node( ad );
 		n->near_b->near_f = n;
 		n->near_b->x = n->x;
 		n->near_b->y = n->y - 1;
-		check_node( ad, n, n->near_b, ASTAR_SQUARE, len );
+		check_node( ad, n, n->near_b, 1.0, len );
 
 		astar_n * dn;
 
@@ -252,7 +252,7 @@ printf( "Path founded! ..\n" );
 		n->near_f->near_l = dn; dn->near_r = n->near_f;
 		dn->x = n->x - 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
+		check_node( ad, n, dn, 1.4, len );
 		
 		/* near right-forward */
 		dn = n->near_r->near_f;
@@ -261,7 +261,7 @@ printf( "Path founded! ..\n" );
 		n->near_f->near_r = dn; dn->near_l = n->near_f;
 		dn->x = n->x + 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
+		check_node( ad, n, dn, 1.4, len );
 
 		/* near right-back */
 		dn = n->near_r->near_b;
@@ -270,7 +270,7 @@ printf( "Path founded! ..\n" );
 		n->near_b->near_r = dn; dn->near_l = n->near_b;
 		dn->x = n->x + 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
+		check_node( ad, n, dn, 1.4, len );
 
 		/* near left-back */
 		dn = n->near_l->near_b;
@@ -279,7 +279,7 @@ printf( "Path founded! ..\n" );
 		n->near_b->near_l = dn; dn->near_r = n->near_b;
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, ASTAR_DIAGONAL, len );
+		check_node( ad, n, dn, 1.4, len );
 	}
 	
 	return 0l; /* A* fail */

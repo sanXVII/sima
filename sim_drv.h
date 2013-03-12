@@ -34,6 +34,10 @@ typedef struct sim_drv
 	float now_t; /* Position on segment [0.0 .. 1.0). */
 
 	struct astar * a_star;
+	float ax_tx; /* translation A* points */
+	float ax_ty; /* X = ax_tx * astarX + ay_tx * astarY */
+	float ay_tx; /* Y = ax_ty * astarX + ay_ty * astarY */
+	float ay_ty;
 
 	struct sim_drv * next;
 } sim_drv;
@@ -50,5 +54,13 @@ void exec_sim_drv( void );
 
 /* Closing and freeing all data structures before program exit. */
 void close_sim_drv( void );
+
+
+/* Translate A* point coordinates */
+float get_x( sim_drv * drv, int astar_x, int astar_y );
+float get_y( sim_drv * drv, int astar_x, int astar_y );
+#define ASTEP (0.1) /* metr */
+
+
 
 #endif /* SIM_DRV_H_ */

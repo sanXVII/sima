@@ -46,9 +46,6 @@ typedef struct astar
 	int nblk_cnt; /* Count of node blocks */
 } astar;
 
-#define ASTAR_SQUARE (0.1)    /* Metr */
-#define ASTAR_DIAGONAL (0.14) /* Metr */
-
 
 
 /* Create and destroy A* data structures */
