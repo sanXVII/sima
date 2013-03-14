@@ -101,15 +101,26 @@ static void reset_task( sim_drv * drv )
 	drv->now_t = 0.0; /* begin of spline */
 
 	/* A* */
+	bx = drv->the_ant->pos_x;
+	by = drv->the_ant->pos_y;
+	ex = drv->act_task.tg_x;
+	ey = drv->act_task.tg_y;
 	float dist = sqrt( ( ex - bx ) * ( ex - bx ) + ( ey - by ) * ( ey - by ) );
-	astar_n * route = make_astar( drv->a_star, ( int )( dist / ASTEP ) );
-	assert( route ); /* Что делать? */
+	int dist_steps = ( int )( dist / ASTEP );
+	
+	astar_n * route = 0l;
+	if( dist_steps )
+	{
+		route = make_astar( drv->a_star, dist_steps );
 
-	/* A* points tranformation matrix */
-	drv->ay_tx = ( ex - bx ) * ASTEP / dist;
-	drv->ay_ty = ( ey - by ) * ASTEP / dist;
-	drv->ax_tx = drv->ay_ty;
-	drv->ax_ty = ( -1.0 ) * drv->ay_tx;
+		/* A* points tranformation matrix */
+		drv->ay_tx = ( ex - bx ) * ASTEP / dist;
+		drv->ay_ty = ( ey - by ) * ASTEP / dist;
+		drv->ax_tx = drv->ay_ty;
+		drv->ax_ty = ( -1.0 ) * drv->ay_tx;
+		drv->ax_0 = bx;
+		drv->ay_0 = by;
+	}
 	
 }
 
@@ -275,11 +286,11 @@ void close_sim_drv( void )
 
 inline float get_x( sim_drv * drv, int astar_x, int astar_y )
 {
-	return drv->ax_tx * ( float )astar_x + drv->ay_tx * ( float )astar_y;
+	return drv->ax_tx * ( float )astar_x + drv->ay_tx * ( float )astar_y + drv->ax_0;
 }
 
 inline float get_y( sim_drv * drv, int astar_x, int astar_y )
 {
-	return drv->ax_ty * ( float )astar_x + drv->ay_ty * ( float )astar_y;
+	return drv->ax_ty * ( float )astar_x + drv->ay_ty * ( float )astar_y + drv->ay_0;
 }
 

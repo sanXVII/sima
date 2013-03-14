@@ -35,9 +35,11 @@ typedef struct sim_drv
 
 	struct astar * a_star;
 	float ax_tx; /* translation A* points */
-	float ax_ty; /* X = ax_tx * astarX + ay_tx * astarY */
-	float ay_tx; /* Y = ax_ty * astarX + ay_ty * astarY */
+	float ax_ty; /* X = ax_tx * astarX + ay_tx * astarY + ax_0 */
+	float ay_tx; /* Y = ax_ty * astarX + ay_ty * astarY + ay_0 */
 	float ay_ty;
+	float ax_0;
+	float ay_0;
 
 	struct sim_drv * next;
 } sim_drv;

@@ -21,6 +21,7 @@
 #include "wd_gui.h"
 #include "wd_of_ants.h"
 #include "sim_drv.h"
+#include "astar.h"
 #include "ant_furer.h"
 
 
@@ -403,6 +404,43 @@ static void * gui_entry( void * args )
 				glVertex3f( tx - 0.05, ty + 0.05, 0.0 );
 				glVertex3f( tx + 0.05, ty - 0.05, 0.0 );
 				glEnd();
+
+				/* Show astar points */
+				int point_cnt = sdrv->a_star->n_use_num;
+//printf( "------- astar %i nodes -------\n", point_cnt );
+				astar_nblock * cb = &( sdrv->a_star->first_blk );
+				while( cb )
+				{
+					int an;
+					for( an = 0; an < ASTAR_NBLOCK_SZ; an++ )
+					{
+						if( !( point_cnt ) ) break;
+						point_cnt--;
+
+						astar_n * node = cb->node + an;
+						float fx = get_x( sdrv, node->x, node->y );
+						float fy = get_y( sdrv, node->x, node->y );
+//printf( "nd( %i:%i )->(%f:%f)\n", node->x, node->y, fx, fy );
+						glBegin( GL_LINES );
+						glColor3f( 0.3f, 0.3f, 0.3f );
+						glVertex3f( fx - 0.01, fy - 0.01, 0.0 );
+						glVertex3f( fx + 0.01, fy + 0.01, 0.0 );
+						glVertex3f( fx - 0.01, fy + 0.01, 0.0 );
+						glVertex3f( fx + 0.01, fy - 0.01, 0.0 );
+						glEnd();
+
+						if( node->dao )
+						{
+							glBegin( GL_LINES );
+							glColor3f( 0.8f, 0.3f, 0.3f );
+							glVertex3f( fx, fy, 0.0 );
+							glVertex3f( get_x( sdrv, node->dao->x, node->dao->y ), 
+								get_y( sdrv, node->dao->x, node->dao->y ), 0.0 );
+							glEnd();
+						}
+					}
+					cb = cb->next;
+				}
 			}
 			sdrv = sdrv->next;
 		}
@@ -458,9 +496,6 @@ static void * gui_entry( void * args )
 			case SDL_KEYUP:
 				key_up( event.key.keysym.sym );
 				break;
-			//case SDL_KEYDOWN:
-			//	done++;
-			//	break;
 			}
 		}
 
