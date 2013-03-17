@@ -17,7 +17,12 @@ typedef struct rtree_nblk
 
 typedef struct rtree
 {
+  
+  
   rtree_nblk first_blk;
+  rtree_nblk * cur_blk;
+  int cur_cnt;
+  
 } rtree;
 
 
