@@ -2,8 +2,18 @@
 #define RTREE_H_
 
 
+
+#define RTREE_CHILDS (3)
 typedef struct rtree_n
 {
+	float max_x;
+	float min_x;
+	float max_y;
+	float min_y;
+	void * val;
+
+	struct rtree_n * parent;
+	struct rtree_n ** child[ RTREE_CHILDS ];
 } rtree_n;
 
 
@@ -17,12 +27,11 @@ typedef struct rtree_nblk
 
 typedef struct rtree
 {
-  
-  
+	rtree_n * adam; /* first node */
+
 	rtree_nblk first_blk;
 	rtree_nblk * cur_blk;
-	int cur_cnt;
-  
+	int cur_cnt;  
 } rtree;
 
 
@@ -30,11 +39,11 @@ rtree * new_rtree( void );
 void del_rtree( rtree * rt );
 
 
-/* Add point to R-tree
+/* Add point to R-tree. Not thread-safe function
  * rt   - main data
  * x, y - point coordinates
  * p    - pointer to customer data */
-void to_rtree( rtree * rt, float x, float y, void * p );
+void to_rtree( rtree * rt, float x, float y, void * val );
 
 
 #endif /* RTREE_H_ */
