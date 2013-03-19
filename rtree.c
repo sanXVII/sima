@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "rtree.h"
 
@@ -17,10 +19,10 @@ rtree * new_rtree( void )
 
 void del_rtree( rtree * rt )
 {
-	rtree * ct = rt->first_blk.next;
+	rtree_nblk * ct = rt->first_blk.next;
 	while( ct )
 	{
-		rtree * kill = ct;
+		rtree_nblk * kill = ct;
 		ct = ct->next;
 
 		free( kill );
@@ -49,19 +51,57 @@ static rtree_n * get_new_node( rtree * rt )
 
 
 /* Catch child node to parent. */
-static void to_rtree_node( rtree_n * parent, rtree_n * child )
+static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 {
+	if( parent->val ) /* is leaf */
+	{
+		rtree_n * nn = get_new_node( rt );
+		nn->max_x = nn->min_x = parent->max_x;
+		nn->max_y = nn->min_y = parent->max_y;
+		nn->val = parent->val;
+		nn->parent = parent;
+
+		parent->val = 0l; /* not is leaf */
+		parent->child[ RTREE_CHILDS - 1 ] = nn;
+	}
+
+	/* Check parets borders. */
+	parent->max_x = ( child->max_x > parent->max_x ) ? child->max_x : parent->max_x;
+	parent->max_y = ( child->max_y > parent->max_y ) ? child->max_y : parent->max_y;
+	parent->min_x = ( child->min_x < parent->min_x ) ? child->min_x : parent->min_x;
+	parent->min_y = ( child->min_y < parent->min_y ) ? child->min_y : parent->min_y;
+
+	float min_dS;
+	int best_i = 0; /* to first child */
+
 	int i;
 	for( i = 0; i < RTREE_CHILDS; i++ )
 	{
-		/* Если опал в прямоугольник, то рекурсивный вызов и выход */
+		rtree_n * tnod = parent->child[ i ];
+		if( !tnod )
+		{
+			parent->child[ i ] = child;
+			child->parent = parent;
+			return;
+		}
 
-		/* Если NULL то цепляем и выход */
+		float max_x = ( child->max_x > tnod->max_x ) ? child->max_x : tnod->max_x;
+		float max_y = ( child->max_y > tnod->max_y ) ? child->max_y : tnod->max_y;
+		float min_x = ( child->min_x < tnod->min_x ) ? child->min_x : tnod->min_x;
+		float min_y = ( child->min_y < tnod->min_y ) ? child->min_y : tnod->min_y;
 
-		/* Смотрим насколько надо растягивать .. если меньше то запомним */
+		float dS = ( max_x - min_x ) * ( max_y - min_y );
+		dS -= ( tnod->max_x - tnod->min_x ) * ( tnod->max_y - tnod->min_y );
+
+		min_dS = !i ? dS : min_dS; /* init value */
+		if( min_dS > dS ) /* look for minimal change required child */
+		{
+			min_dS = dS;
+			best_i = i;
+		}
 	}
 
-	/* Растянем прямоугольник и рекурсивный вызов и выход */
+	to_rtree_node( rt, parent->child[ best_i ], child );
 }
 
 void to_rtree( rtree * rt, float x, float y, void * val )
@@ -77,7 +117,39 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 	}
 	else
 	{
-		to_rtree_node( rt->adam, nn );
+		to_rtree_node( rt, rt->adam, nn );
 	}
+}
+
+
+static void print_node( rtree_n * n )
+{
+	if( n->val ) /* is_leaf */
+	{
+		/* Show full path for this leaf */
+		rtree_n * show = n;
+		while( show )
+		{
+			printf( "(x: %0.2f..%0.2f y: %0.2f..%0.2f)[%p] -> ", show->min_x, 
+				show->max_x, show->min_y, show->max_y, show->val );
+			show = show->parent;
+		}
+		printf( "\n" );
+		return;
+	}
+
+	int i;
+	for( i = 0; i < RTREE_CHILDS; i++ )
+	{
+		if( n->child[ i ] )
+		{
+			print_node( n->child[ i ] );
+		}
+	}
+}
+
+void print_rtree( rtree * rt )
+{
+	print_node( rt->adam );
 }
 

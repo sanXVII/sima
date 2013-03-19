@@ -3,7 +3,7 @@
 
 
 
-#define RTREE_CHILDS (3)
+#define RTREE_CHILDS (4) /* child nodes per parent */
 typedef struct rtree_n
 {
 	float max_x;
@@ -13,7 +13,7 @@ typedef struct rtree_n
 	void * val;
 
 	struct rtree_n * parent;
-	struct rtree_n ** child[ RTREE_CHILDS ];
+	struct rtree_n * child[ RTREE_CHILDS ];
 } rtree_n;
 
 
@@ -45,5 +45,7 @@ void del_rtree( rtree * rt );
  * p    - pointer to customer data */
 void to_rtree( rtree * rt, float x, float y, void * val );
 
+/* Print all R-tree to stdout */
+void print_rtree( rtree * rt );
 
 #endif /* RTREE_H_ */
