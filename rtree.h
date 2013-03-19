@@ -13,7 +13,8 @@ typedef struct rtree_n
 	void * val;
 
 	struct rtree_n * parent;
-	struct rtree_n * child[ RTREE_CHILDS ];
+	struct rtree_n * child;
+	struct rtree_n * sister;
 } rtree_n;
 
 

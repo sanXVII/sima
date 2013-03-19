@@ -7,7 +7,7 @@ int main( void )
 	rtree * tree = new_rtree();
 
 	int i;
-	for( i = 1; i <= 1000000; i++ )
+	for( i = 1; i <= 100000; i++ )
 	{
 		to_rtree( tree, (float)( rand() % 1000 ) - 500.0,
 				(float)( rand() % 1000 ) - 500.0, ( void * )i );

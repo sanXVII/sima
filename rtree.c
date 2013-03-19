@@ -62,8 +62,7 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 		nn->parent = parent;
 
 		parent->val = 0l; /* not is leaf */
-		parent->child[ RTREE_CHILDS - 1 ] = nn;
-		//nn->child_id = RTREE_CHILDS - 1;
+		parent->child = nn;
 	}
 
 	/* Check parets borders. */
@@ -73,17 +72,17 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 	parent->min_y = ( child->min_y < parent->min_y ) ? child->min_y : parent->min_y;
 
 	float min_dS;
-	int best_i = 0; /* to first child */
+	rtree_n * best_child = parent->child; /* to first child */
 
 	int i;
+	rtree_n * tnod = parent->child;
 	for( i = 0; i < RTREE_CHILDS; i++ )
 	{
-		rtree_n * tnod = parent->child[ i ];
 		if( !tnod )
 		{
-			parent->child[ i ] = child;
+			child->sister = parent->child;
+			parent->child = child;
 			child->parent = parent;
-			//child->child_id = i;
 			return;
 		}
 
@@ -99,11 +98,12 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 		if( min_dS > dS ) /* look for minimal change required child */
 		{
 			min_dS = dS;
-			best_i = i;
+			best_child = tnod;
 		}
+		tnod = tnod->sister;
 	}
 
-	to_rtree_node( rt, parent->child[ best_i ], child );
+	to_rtree_node( rt, best_child, child );
 }
 
 void to_rtree( rtree * rt, float x, float y, void * val )
@@ -125,6 +125,20 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 
 rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
 {
+	rtree_n * flag = cur_n;
+
+	if( flag->child )
+	{
+		flag = flag->child;
+	}
+	else if( flag->sister )
+	{
+		flag = flag->sister;
+	}
+	else if( flag->parent )
+	{
+		flag = flag->parent;
+	}
 	
 }
 
@@ -136,7 +150,7 @@ static void print_node( rtree_n * n )
 		rtree_n * show = n;
 		while( show )
 		{
-			printf( "(x: %0.2f..%0.2f y: %0.2f..%0.2f)[%p] -> ", show->min_x, 
+			printf( "(x:%0.2f..%0.2f y:%0.2f..%0.2f)[%p] -> ", show->min_x, 
 				show->max_x, show->min_y, show->max_y, show->val );
 			show = show->parent;
 		}
@@ -144,13 +158,11 @@ static void print_node( rtree_n * n )
 		return;
 	}
 
-	int i;
-	for( i = 0; i < RTREE_CHILDS; i++ )
+	rtree_n * cur_n = n->child;;
+	while( cur_n )
 	{
-		if( n->child[ i ] )
-		{
-			print_node( n->child[ i ] );
-		}
+		print_node( cur_n );
+		cur_n = cur_n->sister;
 	}
 }
 
