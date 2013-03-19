@@ -63,6 +63,7 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 
 		parent->val = 0l; /* not is leaf */
 		parent->child[ RTREE_CHILDS - 1 ] = nn;
+		//nn->child_id = RTREE_CHILDS - 1;
 	}
 
 	/* Check parets borders. */
@@ -82,6 +83,7 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 		{
 			parent->child[ i ] = child;
 			child->parent = parent;
+			//child->child_id = i;
 			return;
 		}
 
@@ -121,6 +123,10 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 	}
 }
 
+rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
+{
+	
+}
 
 static void print_node( rtree_n * n )
 {
