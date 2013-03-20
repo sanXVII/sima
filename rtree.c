@@ -125,21 +125,9 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 
 rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
 {
-	rtree_n * flag = cur_n;
-
-	if( flag->child )
+	while( 1 )
 	{
-		flag = flag->child;
 	}
-	else if( flag->sister )
-	{
-		flag = flag->sister;
-	}
-	else if( flag->parent )
-	{
-		flag = flag->parent;
-	}
-	
 }
 
 static void print_node( rtree_n * n )
