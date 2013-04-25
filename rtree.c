@@ -123,11 +123,43 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 	}
 }
 
+
+
+static rtree_n * get_down( rtree_n * cur_n, float x, float y, float delta )
+{
+	while( cur_n->child )
+	{
+		/* Если x:y не внутри cur_n то вернем cur_n */
+
+		cur_n = cur_n->child;
+	}
+	return cur_n;
+}
+
+static rtree_n * get_right( rtree_n * cur_n )
+{
+	while( cur_n )
+	{
+		if( cur_n->sister )
+		{
+			cur_n = cur_n->sister;
+			return cur_n;
+		}
+
+		cur_n = cur_n->parent;
+	}
+
+	return cur_n;
+}
+
 rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
 {
-	while( 1 )
+	cur_n = get_down( cur_n );
+
+	do
 	{
 	}
+	while( );
 }
 
 static void print_node( rtree_n * n )
