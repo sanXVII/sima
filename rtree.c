@@ -154,12 +154,10 @@ static rtree_n * get_right( rtree_n * cur_n )
 
 rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
 {
-	cur_n = get_down( cur_n );
-
-	do
+	rtree_n * next = cur_n;
+	while( next )
 	{
 	}
-	while( );
 }
 
 static void print_node( rtree_n * n )
