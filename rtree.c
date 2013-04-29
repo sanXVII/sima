@@ -45,6 +45,9 @@ static rtree_n * get_new_node( rtree * rt )
 		memset( new, 0, sizeof( rtree_nblk ) );
 		rt->cur_blk->next = new;
 		rt->cur_blk = new;
+//static int bcnt = 0;
+//printf( "block cnt = %i ..\n", bcnt );
+//bcnt++;
 	}
 	return rval;
 }
@@ -124,16 +127,20 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 }
 
 
-static int is_goot_xy( rtree_n * n, float x, float y )
+static int is_good_xy( rtree_n * n, float x, float y, float delta )
 {
-	
+	if( x < ( n->min_x - delta ) ) return 0;
+	if( x > ( n->max_x + delta ) ) return 0;
+	if( y < ( n->min_y - delta ) ) return 0;
+	if( y > ( n->max_y + delta ) ) return 0;
+	return 1; /* Good node */
 }
 
 static rtree_n * get_down( rtree_n * cur_n, float x, float y, float delta )
 {
 	while( cur_n->child )
 	{
-		if( is_good_xy( cur_n, x, y, delta ) ) break;
+		if( !is_good_xy( cur_n, x, y, delta ) ) break;
 		cur_n = cur_n->child;
 	}
 	return cur_n;
@@ -155,7 +162,7 @@ static rtree_n * get_right( rtree_n * cur_n )
 	return cur_n;
 }
 
-rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
+rtree_n * get_next_near( rtree_n * cur_n, float x, float y, float delta )
 {
 	rtree_n * next = cur_n;
 	int to_right = 0;

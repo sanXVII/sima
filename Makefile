@@ -9,7 +9,7 @@ LIBS = -lm `sdl-config --libs` -lSDL_ttf -lGL -lGLU
 
 
 
-all: sima
+all: sima rtree_test
 
 sima: main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o
 	$(CC) -o sima main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o $(CFLAGS) $(LDFLAGS) $(LIBS)

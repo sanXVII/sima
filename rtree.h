@@ -18,7 +18,7 @@ typedef struct rtree_n
 } rtree_n;
 
 
-#define RTREE_NBLOCK_SZ (1000)
+#define RTREE_NBLOCK_SZ (5000)
 typedef struct rtree_nblk
 {
 	rtree_n node[ RTREE_NBLOCK_SZ ];
@@ -45,6 +45,18 @@ void del_rtree( rtree * rt );
  * x, y - point coordinates
  * p    - pointer to customer data */
 void to_rtree( rtree * rt, float x, float y, void * val );
+
+/* Find near node.
+ *
+ * cur_n - current near node. We want to find next.
+ *         Put rt->adam to this argument, for first search.
+ * ( x +- delta, y +- delta ) - Region of search.
+ *
+ * Return pointer to the wanted object or NULL, if not found.
+ * See rtree_n structure and you may extract void * val to your application data. 
+ */
+rtree_n * get_next_near( rtree_n * cur_n, float x, float y, float delta );
+
 
 /* Print all R-tree to stdout */
 void print_rtree( rtree * rt );
