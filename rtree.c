@@ -124,13 +124,16 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 }
 
 
+static int is_goot_xy( rtree_n * n, float x, float y )
+{
+	
+}
 
 static rtree_n * get_down( rtree_n * cur_n, float x, float y, float delta )
 {
 	while( cur_n->child )
 	{
-		/* Если x:y не внутри cur_n то вернем cur_n */
-
+		if( is_good_xy( cur_n, x, y, delta ) ) break;
 		cur_n = cur_n->child;
 	}
 	return cur_n;
@@ -155,9 +158,19 @@ static rtree_n * get_right( rtree_n * cur_n )
 rtree_n * get_next_near( rtree * rt, rtree_n * cur_n, float x, float y, float delta )
 {
 	rtree_n * next = cur_n;
-	while( next )
+	int to_right = 0;
+	while( 1 )
 	{
+		next = to_right ? get_right( next ) : get_down( next, x, y, delta );
+		to_right = ~to_right;
+		if( !next ) break;
+
+		if( next->val && ( next != cur_n ) )
+		{
+			if( is_good_xy( next, x, y, delta ) ) break;
+		}
 	}
+	return next;
 }
 
 static void print_node( rtree_n * n )
