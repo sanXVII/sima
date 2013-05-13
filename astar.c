@@ -157,6 +157,10 @@ static astar_n * cut_heap_head( astar * ad )
 
 static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost, int len )
 {
+	/* Prepare real coordinates */
+	child->real_x = ad->ax_tx * ( float )child->x + ad->ay_tx * ( float )child->y + ad->ax_0;
+	child->real_y = ad->ax_ty * ( float )child->x + ad->ay_ty * ( float )child->y + ad->ay_0;
+
 	/* Check for borders from parent to child ---------- */
 //printf( "check %p [%i:%i]\n", child, child->x, child->y );
 	float newg = cost + parent->g;
@@ -181,13 +185,24 @@ static void check_node( astar * ad, astar_n * parent, astar_n * child, float cos
 	}
 }
 
-astar_n * make_astar( astar * ad, int len )
+astar_n * make_astar( astar * ad, float bx, float by, float ex, float ey )
 {
 printf( "Reset A* ...\n" );
 	/* Clear previus route. */
 	ad->n_use_num = 0;
 	ad->opens_num = 0;
 	ad->cur_blk = &( ad->first_blk );
+
+	/* A* points tranformation matrix */
+	float dist = sqrt( ( ex - bx ) * ( ex - bx ) + ( ey - by ) * ( ey - by ) );
+	int len = ( int )( dist / ASTEP );
+	if( !len ) return 0l;
+	ad->ay_tx = ( ex - bx ) * ASTEP / dist;
+	ad->ay_ty = ( ey - by ) * ASTEP / dist;
+	ad->ax_tx = ad->ay_ty;
+	ad->ax_ty = ( -1.0 ) * ad->ay_tx;
+	ad->ax_0 = bx;
+	ad->ay_0 = by;
 	
 	/* Mark first node. */
 	astar_n * s = get_new_node( ad );
@@ -195,8 +210,8 @@ printf( "Reset A* ...\n" );
 	s->g = 0.0;
 	s->h = ( float )len;
 	s->f = s->g + s->h;
-	s->x = 0;
-	s->y = 0;
+	s->x = 0; s->real_x = bx;
+	s->y = 0; s->real_y = by;
 
 	add_to_heap( ad, s );
 

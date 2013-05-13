@@ -418,8 +418,8 @@ static void * gui_entry( void * args )
 						point_cnt--;
 
 						astar_n * node = cb->node + an;
-						float fx = get_x( sdrv, node->x, node->y );
-						float fy = get_y( sdrv, node->x, node->y );
+						float fx = node->real_x;
+						float fy = node->real_y;
 //printf( "nd( %i:%i )->(%f:%f)\n", node->x, node->y, fx, fy );
 						glBegin( GL_LINES );
 						glColor3f( 0.3f, 0.3f, 0.3f );
@@ -434,8 +434,7 @@ static void * gui_entry( void * args )
 							glBegin( GL_LINES );
 							glColor3f( 0.8f, 0.3f, 0.3f );
 							glVertex3f( fx, fy, 0.0 );
-							glVertex3f( get_x( sdrv, node->dao->x, node->dao->y ), 
-								get_y( sdrv, node->dao->x, node->dao->y ), 0.0 );
+							glVertex3f( node->dao->real_x, node->dao->real_y, 0.0 );
 							glEnd();
 						}
 					}
