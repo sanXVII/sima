@@ -6,6 +6,7 @@
 
 #include "wd_of_ants.h"
 #include "sim_drv.h"
+#include "rtree.h"
 
 
 
@@ -50,12 +51,24 @@ int wd_of_ants_init( void )
 	ant * first_ant = add_muvi_ant( &my_world, 0, 0, 0 );
 	add_sim_drv( &my_world, first_ant );
 
+	/* Walls and barriers */
+	my_world.stub = new_rtree();
+	assert( my_world.stub );
+	
+	float xx;
+	for( xx = -0.6; xx < 0.6; xx += 0.07 )
+	{
+		to_rtree( my_world.stub, xx, xx + 0.3, ( void * )1 );
+	}
+
 	printf( "I am happy say you that: Make the World of Ants complete!\n" );
 	return 0;
 }
 
 void wd_of_ants_destroy( void )
 {
+	del_rtree( my_world.stub );
+
 	close_sim_drv();
 
 	/* Deletion of muvi ants */
@@ -96,12 +109,12 @@ void wd_of_ants_run( void )
 		cant->pos_ang += ( rmove - lmove ) / cant->axis_len;
 //printf( "( rmove - lmove ) / cant->axis_len =%f\n", ( rmove - lmove ) / cant->axis_len );
 //printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
-if( ( rand() % 1000 ) > 998 )
-{
-	cant->pos_x += 0.01;
-	cant->pos_y += 0.01;
-	cant->pos_ang += (float)( rand() % 1000 ) / 1000.0;
-}
+//if( ( rand() % 1000 ) > 998 )
+//{
+//	cant->pos_x += 0.01;
+//	cant->pos_y += 0.01;
+//	cant->pos_ang += (float)( rand() % 1000 ) / 1000.0;
+//}
 		cant = cant->next;
 	}
 

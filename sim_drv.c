@@ -101,7 +101,7 @@ static void reset_task( sim_drv * drv )
 	drv->now_t = 0.0; /* begin of spline */
 
 	/* A* */
-	astar_n * route = make_astar( drv->a_star, drv->the_ant->pos_x, 
+	astar_n * route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x, 
 			drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
 	
 }

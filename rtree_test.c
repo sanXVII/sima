@@ -12,7 +12,7 @@ typedef struct l_pnt_t
 	void * val;
 } l_pnt_t;
 
-#define POINTS_CNT 1000000
+#define POINTS_CNT 5000000
 static l_pnt_t l_pnt[ POINTS_CNT ];
 
 
@@ -32,7 +32,7 @@ int main( void )
 
 	gettimeofday( &( start_time ), 0l );
 
-	int i;
+	long i;
 	for( i = 1; i <= POINTS_CNT; i++ )
 	{
 		l_pnt[ i ].x = (float)( rand() % 10000 ) - 500.0;

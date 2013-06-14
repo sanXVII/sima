@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "astar.h"
+#include "rtree.h"
 
 
 
@@ -155,19 +156,26 @@ static astar_n * cut_heap_head( astar * ad )
 	return rval;
 }
 
-static void check_node( astar * ad, astar_n * parent, astar_n * child, float cost, int len )
+static void check_node( astar * ad, rtree * stubs, 
+			astar_n * parent, astar_n * child, 
+			float cost, int len )
 {
 	/* Prepare real coordinates */
 	child->real_x = ad->ax_tx * ( float )child->x + ad->ay_tx * ( float )child->y + ad->ax_0;
 	child->real_y = ad->ax_ty * ( float )child->x + ad->ay_ty * ( float )child->y + ad->ay_0;
 
-	/* Check for borders from parent to child ---------- */
-//printf( "check %p [%i:%i]\n", child, child->x, child->y );
 	float newg = cost + parent->g;
 	if( child->state && ( child->g <= newg ) )
 	{
 		return;
 	}
+
+	/* Check for borders from parent to child ---------- */
+	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 30sm */ ) )
+	{
+		newg += 5.0/* m */;
+	}
+
 
 	child->parent = parent;
 	child->g = newg;
@@ -185,7 +193,7 @@ static void check_node( astar * ad, astar_n * parent, astar_n * child, float cos
 	}
 }
 
-astar_n * make_astar( astar * ad, float bx, float by, float ex, float ey )
+astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, float ey )
 {
 printf( "Reset A* ...\n" );
 	/* Clear previus route. */
@@ -235,28 +243,28 @@ printf( "Path founded! ..\n" );
 		n->near_l->near_r = n;
 		n->near_l->x = n->x - 1;
 		n->near_l->y = n->y;
-		check_node( ad, n, n->near_l, 1.0, len );
+		check_node( ad, stubs, n, n->near_l, 1.0, len );
 
 		/* near right */
 		n->near_r = n->near_r ? n->near_r : get_new_node( ad );
 		n->near_r->near_l = n;
 		n->near_r->x = n->x + 1;
 		n->near_r->y = n->y;
-		check_node( ad, n, n->near_r, 1.0, len );
+		check_node( ad, stubs, n, n->near_r, 1.0, len );
 
 		/* near forward */
 		n->near_f = n->near_f ? n->near_f : get_new_node( ad );
 		n->near_f->near_b = n;
 		n->near_f->x = n->x;
 		n->near_f->y = n->y + 1;
-		check_node( ad, n, n->near_f, 1.0, len );
+		check_node( ad, stubs, n, n->near_f, 1.0, len );
 
 		/* near back */
 		n->near_b = n->near_b ? n->near_b : get_new_node( ad );
 		n->near_b->near_f = n;
 		n->near_b->x = n->x;
 		n->near_b->y = n->y - 1;
-		check_node( ad, n, n->near_b, 1.0, len );
+		check_node( ad, stubs, n, n->near_b, 1.0, len );
 
 		astar_n * dn;
 
@@ -267,7 +275,7 @@ printf( "Path founded! ..\n" );
 		n->near_f->near_l = dn; dn->near_r = n->near_f;
 		dn->x = n->x - 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, 1.4, len );
+		check_node( ad, stubs, n, dn, 1.4, len );
 		
 		/* near right-forward */
 		dn = n->near_r->near_f;
@@ -276,7 +284,7 @@ printf( "Path founded! ..\n" );
 		n->near_f->near_r = dn; dn->near_l = n->near_f;
 		dn->x = n->x + 1;
 		dn->y = n->y + 1;
-		check_node( ad, n, dn, 1.4, len );
+		check_node( ad, stubs, n, dn, 1.4, len );
 
 		/* near right-back */
 		dn = n->near_r->near_b;
@@ -285,7 +293,7 @@ printf( "Path founded! ..\n" );
 		n->near_b->near_r = dn; dn->near_l = n->near_b;
 		dn->x = n->x + 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, 1.4, len );
+		check_node( ad, stubs, n, dn, 1.4, len );
 
 		/* near left-back */
 		dn = n->near_l->near_b;
@@ -294,7 +302,7 @@ printf( "Path founded! ..\n" );
 		n->near_b->near_l = dn; dn->near_r = n->near_b;
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
-		check_node( ad, n, dn, 1.4, len );
+		check_node( ad, stubs, n, dn, 1.4, len );
 	}
 	
 	return 0l; /* A* fail */

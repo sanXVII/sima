@@ -19,7 +19,7 @@ typedef struct sp3_seg
 	float len;	
 } sp3_seg;
 
-#define MAX_SP3 10
+#define MAX_SP3 1
 
 typedef struct sim_drv
 {

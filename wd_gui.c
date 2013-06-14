@@ -23,6 +23,7 @@
 #include "sim_drv.h"
 #include "astar.h"
 #include "ant_furer.h"
+#include "rtree.h"
 
 
 /* */
@@ -350,6 +351,23 @@ static void * gui_entry( void * args )
 			cant = cant->next;
 		}
 
+		/* Showing stubs */
+		rtree_n * cur;
+		for( cur = get_next_near( world->stub->adam, 0.0, 0.0, 999.9 );
+			cur != 0; cur = get_next_near( cur, 0.0, 0.0, 999.9 ) )
+		{
+			float fx = cur->max_x;
+			float fy = cur->max_y;
+
+			glBegin( GL_TRIANGLE_STRIP );
+			glColor3f( 0.6f, 0.6f, 0.6f );
+			glVertex3f( fx - 0.04, fy - 0.04, 0.0 );
+			glVertex3f( fx - 0.04, fy + 0.04, 0.0 );
+			glVertex3f( fx + 0.04, fy + 0.04, 0.0 );
+			glVertex3f( fx + 0.04, fy - 0.04, 0.0 );
+			glEnd();
+		}
+
 		/* Show simple drivers on board. */
 		sim_drv * sdrv = all_simple_drivers();
 		while( sdrv )
@@ -440,6 +458,7 @@ static void * gui_entry( void * args )
 					}
 					cb = cb->next;
 				}
+
 			}
 			sdrv = sdrv->next;
 		}

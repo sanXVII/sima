@@ -22,9 +22,12 @@ typedef struct ant
 
 
 
+struct rtree;
+
 /* Main struct for fully describe of one system. */
 typedef struct wd_of_ants
 {
+	struct rtree * stub; /* Barrier points */
 	ant * muvis; /* List of muvi ants. */
 
 	unsigned long sim_cnt;

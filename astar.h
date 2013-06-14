@@ -66,13 +66,17 @@ astar * new_astar( void );
 void delete_astar( astar * );
 
 
+
+struct rtree;
+
 /* bx,by - start point
  * ex,ey - end point
+ * stubs - barrier points
  *
  * Return pointer to first path node.
  *   NULL - fail
  */
-astar_n * make_astar( astar * ad, float bx, float by, float ex, float ey );
+astar_n * make_astar( astar * ad, struct rtree * stubs, float bx, float by, float ex, float ey );
 
 #define ASTEP (0.1) /* metr */
 
