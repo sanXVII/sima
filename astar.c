@@ -15,7 +15,7 @@ static void add_new_block( astar * ad )
 	astar_nblock * new = ( astar_nblock * )malloc( sizeof( astar_nblock ) );
 	assert( new );
 	memset( new, 0, sizeof( astar_nblock ) );
-printf( "add_new_block .. \n" );
+//printf( "add_new_block .. \n" );
 	
 	ad->nblk_cnt++;
 
@@ -38,7 +38,7 @@ static astar_n * get_new_node( astar * ad )
 {
 	astar_n * ret = ad->cur_blk->node + ad->n_use_num % ASTAR_NBLOCK_SZ;
 	ad->n_use_num++;
-//printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
+printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
 
 	if( !( ad->n_use_num % ASTAR_NBLOCK_SZ ) )
 	{
@@ -89,8 +89,10 @@ void delete_astar( astar * ad )
 
 static void to_up( astar * ad, astar_n * tail )
 {
+//printf( "+++++ to_up %p\n", tail );
 	while( 1 )
 	{
+//printf( "zzzzz\n" );
 		int hid = tail->heap_id - 1;
 		hid = hid < 0 ? 0 : hid >> 1;
 		astar_n * head = ad->opens_heap[ hid ];
@@ -132,6 +134,7 @@ static astar_n * cut_heap_head( astar * ad )
 	astar_n * head = ad->opens_heap[ 0 ];
 	while( 1 )
 	{
+printf( "........\n" );
 		int tid = 2 * hid + 1;
 		
 		if( tid >= ad->opens_num ) break;
@@ -152,6 +155,7 @@ static astar_n * cut_heap_head( astar * ad )
 		hid = tid;
 		head = tail;
 	}
+//printf( "Cut head heap %p .. opens_num = %i\n", rval, ad->opens_num );
 	
 	return rval;
 }
@@ -165,15 +169,18 @@ static void check_node( astar * ad, rtree * stubs,
 	child->real_y = ad->ax_ty * ( float )child->x + ad->ay_ty * ( float )child->y + ad->ay_0;
 
 	float newg = cost + parent->g;
-	if( child->state && ( child->g <= newg ) )
+printf( "Check node %p[%f : %f] newg=%f\n", child, child->real_x, child->real_y, newg );
+
+	/* Check for borders from parent to child ---------- */
+	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ ) )
 	{
+		//newg += 50.0/* m */;
 		return;
 	}
 
-	/* Check for borders from parent to child ---------- */
-	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 30sm */ ) )
+	if( child->state && ( child->g <= newg ) )
 	{
-		newg += 5.0/* m */;
+		return;
 	}
 
 
@@ -183,12 +190,15 @@ static void check_node( astar * ad, rtree * stubs,
 			( float )( child->y - len ) * ( float )( child->y - len ) );
 	child->f = child->g + child->h;
 
+//printf( "++ child=%p state=%i\n", child, child->state );
 	if( child->state == 1/*open*/ )
 	{
+//printf( "to_up %p\n", child );
 		to_up( ad, child );
 	}
 	else
 	{
+//printf( "add_to_heap %p\n", child );
 		add_to_heap( ad, child );
 	}
 }
@@ -226,6 +236,7 @@ printf( "Reset A* ...\n" );
 	astar_n * n;
 	while( ( n = cut_heap_head( ad ) ) )
 	{
+printf( "Check %p ..\n", n );
 		if( ( n->x == 0 ) && ( n->y == len ) )
 		{
 printf( "Path founded! ..\n" );
@@ -303,6 +314,7 @@ printf( "Path founded! ..\n" );
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
 		check_node( ad, stubs, n, dn, 1.4, len );
+printf( "Check complete %p ..\n", n );
 	}
 	
 	return 0l; /* A* fail */
