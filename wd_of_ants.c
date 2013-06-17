@@ -56,9 +56,15 @@ int wd_of_ants_init( void )
 	assert( my_world.stub );
 	
 	float xx;
-	for( xx = -0.6; xx < 0.6; xx += 0.07 )
+	for( xx = -0.6; xx < 0.6; xx += 0.08 )
 	{
-		to_rtree( my_world.stub, xx, xx + 0.3, ( void * )1 );
+		to_rtree( my_world.stub, xx, 0.7, ( void * )1 );
+		to_rtree( my_world.stub, xx, -0.7, ( void * )1 );
+	}
+	float yy;
+	for( yy = -0.7; yy < 0.7; yy += 0.08 )
+	{
+		to_rtree( my_world.stub, -0.7, yy, ( void * )1 );
 	}
 
 	printf( "I am happy say you that: Make the World of Ants complete!\n" );

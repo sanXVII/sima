@@ -85,8 +85,8 @@ static void reset_task( sim_drv * drv )
 		}
 		else
 		{
-			ex = ( float )( rand() % 100 ) / 25.0 - 2.0;
-			ey = ( float )( rand() % 100 ) / 25.0 - 2.0;
+			ex = ( float )( rand() % 180 ) / 30.0 - 3.0;
+			ey = ( float )( rand() % 180 ) / 30.0 - 3.0;
 			eang = M_PI * ( float )( rand() % 100 ) / 50.0;
 		}
 

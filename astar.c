@@ -38,11 +38,11 @@ static astar_n * get_new_node( astar * ad )
 {
 	astar_n * ret = ad->cur_blk->node + ad->n_use_num % ASTAR_NBLOCK_SZ;
 	ad->n_use_num++;
-printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
+//printf( "get_new_node .. n_use_num=%i\n", ad->n_use_num );
 
 	if( !( ad->n_use_num % ASTAR_NBLOCK_SZ ) )
 	{
-printf( "!( ad->n_use_num %% ASTAR_NBLOCK_SZ ) .. cur_blk->next=%p\n", ad->cur_blk->next );
+//printf( "!( ad->n_use_num %% ASTAR_NBLOCK_SZ ) .. cur_blk->next=%p\n", ad->cur_blk->next );
 		if( !ad->cur_blk->next )
 		{
 			add_new_block( ad );
@@ -89,7 +89,7 @@ void delete_astar( astar * ad )
 
 static void to_up( astar * ad, astar_n * tail )
 {
-//printf( "+++++ to_up %p\n", tail );
+//printf( "+ to_up %p\n", tail );
 	while( 1 )
 	{
 //printf( "zzzzz\n" );
@@ -106,6 +106,13 @@ static void to_up( astar * ad, astar_n * tail )
 		ad->opens_heap[ hid ] = tail;
 		ad->opens_heap[ tid ] = head;
 	}
+//int ii = 0;
+//for( ii = 0; ii < ad->opens_num; ii++ )
+//{
+//	printf( "%p -> ", ad->opens_heap[ii] );
+//}
+//printf( "..\n" );
+	
 }
 
 static void add_to_heap( astar * ad, astar_n * tail )
@@ -114,7 +121,7 @@ static void add_to_heap( astar * ad, astar_n * tail )
 	ad->opens_heap[ ad->opens_num ] = tail;
 	tail->heap_id = ad->opens_num;
 	ad->opens_num++;
-//printf( "add_to_heap %i .. %p\n", ad->opens_num, tail );
+//printf( "- add_to_heap %i .. %p\n", ad->opens_num, tail );
 
 	to_up( ad, tail );
 }
@@ -134,18 +141,18 @@ static astar_n * cut_heap_head( astar * ad )
 	astar_n * head = ad->opens_heap[ 0 ];
 	while( 1 )
 	{
-printf( "........\n" );
 		int tid = 2 * hid + 1;
 		
 		if( tid >= ad->opens_num ) break;
 		if( ( tid + 1 ) < ad->opens_num )
 		{
 			tid = ( ad->opens_heap[ tid ]->f < 
-				ad->opens_heap[ tid + 1 ]->f ) ? tid : tid + 1;
+				ad->opens_heap[ tid + 1 ]->f ) ? tid : ( tid + 1 );
 		}
 		astar_n * tail = ad->opens_heap[ tid ];
 		if( head->f < tail->f ) break;
 		
+//printf( "%i<>%i .. ", hid, tid );
 		head->heap_id = tid;
 		tail->heap_id = hid;
 		
@@ -153,9 +160,14 @@ printf( "........\n" );
 		ad->opens_heap[ tid ] = head;
 		
 		hid = tid;
-		head = tail;
 	}
-//printf( "Cut head heap %p .. opens_num = %i\n", rval, ad->opens_num );
+//printf( "\nCut head heap %p .. opens_num = %i\n", rval, ad->opens_num );
+//int ii = 0;
+//for( ii = 0; ii < ad->opens_num; ii++ )
+//{
+//	printf( "%p -> ", ad->opens_heap[ii] );
+//}
+//printf( "..\n" );
 	
 	return rval;
 }
@@ -169,7 +181,7 @@ static void check_node( astar * ad, rtree * stubs,
 	child->real_y = ad->ax_ty * ( float )child->x + ad->ay_ty * ( float )child->y + ad->ay_0;
 
 	float newg = cost + parent->g;
-printf( "Check node %p[%f : %f] newg=%f\n", child, child->real_x, child->real_y, newg );
+//printf( "Check node %p[%f : %f] newg=%f\n", child, child->real_x, child->real_y, newg );
 
 	/* Check for borders from parent to child ---------- */
 	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ ) )
@@ -205,7 +217,7 @@ printf( "Check node %p[%f : %f] newg=%f\n", child, child->real_x, child->real_y,
 
 astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, float ey )
 {
-printf( "Reset A* ...\n" );
+//printf( "Reset A* ... blocks cnt=%i\n", ad->nblk_cnt );
 	/* Clear previus route. */
 	ad->n_use_num = 0;
 	ad->opens_num = 0;
@@ -236,10 +248,10 @@ printf( "Reset A* ...\n" );
 	astar_n * n;
 	while( ( n = cut_heap_head( ad ) ) )
 	{
-printf( "Check %p ..\n", n );
+//printf( "Check %p .. opens %i\n", n, ad->opens_num );
 		if( ( n->x == 0 ) && ( n->y == len ) )
 		{
-printf( "Path founded! ..\n" );
+//printf( "Path founded! ..\n" );
 			/* Path found */
 			while( n->parent )
 			{
@@ -281,7 +293,9 @@ printf( "Path founded! ..\n" );
 
 		/* near left-forward */
 		dn = n->near_l->near_f;
+//printf( "do dn = %p .. ", dn );
 		dn = dn ? dn : get_new_node( ad );
+//printf( "posle dn = %p \n", dn );
 		n->near_l->near_f = dn; dn->near_b = n->near_l;
 		n->near_f->near_l = dn; dn->near_r = n->near_f;
 		dn->x = n->x - 1;
@@ -314,8 +328,9 @@ printf( "Path founded! ..\n" );
 		dn->x = n->x - 1;
 		dn->y = n->y - 1;
 		check_node( ad, stubs, n, dn, 1.4, len );
-printf( "Check complete %p ..\n", n );
+//printf( "Check complete %p ..\n", n );
 	}
+printf( "! Path not found.. n_use_num=%i .. opens_num=%i\n", ad->n_use_num, ad->opens_num );
 	
 	return 0l; /* A* fail */
 }
