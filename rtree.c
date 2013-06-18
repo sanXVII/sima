@@ -152,8 +152,7 @@ static rtree_n * get_right( rtree_n * cur_n )
 	{
 		if( cur_n->sister )
 		{
-			cur_n = cur_n->sister;
-			return cur_n;
+			return cur_n->sister;
 		}
 
 		cur_n = cur_n->parent;

@@ -15,7 +15,7 @@ static void add_new_block( astar * ad )
 	astar_nblock * new = ( astar_nblock * )malloc( sizeof( astar_nblock ) );
 	assert( new );
 	memset( new, 0, sizeof( astar_nblock ) );
-//printf( "add_new_block .. \n" );
+//printf( "add_new_block %p .. %i bytes\n", new, sizeof( astar_nblock ) );
 	
 	ad->nblk_cnt++;
 
@@ -51,6 +51,7 @@ static astar_n * get_new_node( astar * ad )
 	}
 
 	memset( ret, 0, sizeof( astar_n ) );
+//printf( "++++ New node %p ..\n", ret );
 	return ret;
 }
 
@@ -60,6 +61,7 @@ astar * new_astar( void )
 	astar * new = ( astar * )malloc( sizeof( astar ) );
 	assert( new );
 	memset( new, 0, sizeof( astar ) );
+//printf( "Add A* %p .. %i bytes\n", new, sizeof( astar ) );
 
 	new->cur_blk = &( new->first_blk );
 	new->nblk_cnt = 1/* first block */;
@@ -89,16 +91,18 @@ void delete_astar( astar * ad )
 
 static void to_up( astar * ad, astar_n * tail )
 {
-//printf( "+ to_up %p\n", tail );
+//printf( ". to_up %p\n", tail );
 	while( 1 )
 	{
 //printf( "zzzzz\n" );
-		int hid = tail->heap_id - 1;
-		hid = hid < 0 ? 0 : hid >> 1;
-		astar_n * head = ad->opens_heap[ hid ];
-		if( head->f <= tail->f ) break;
-
 		int tid = tail->heap_id;
+		if( !tid /* Tail on heaps head */ ) return;
+
+		int hid = ( tid - 1 ) >> 1;
+		astar_n * head = ad->opens_heap[ hid ];
+
+		if( head->f < tail->f ) return;
+
 //printf( "%p <-> %p .. %i <-> %i .. %f <> %f\n", head, tail, hid, tid, head->f, tail->f );	
 		tail->heap_id = hid;
 		head->heap_id = tid;
@@ -181,42 +185,47 @@ static void check_node( astar * ad, rtree * stubs,
 	child->real_y = ad->ax_ty * ( float )child->x + ad->ay_ty * ( float )child->y + ad->ay_0;
 
 	float newg = cost + parent->g;
-//printf( "Check node %p[%f : %f] newg=%f\n", child, child->real_x, child->real_y, newg );
+//printf( "+ Check node %p[%f : %f] newg=%f .. opens=%i\n", child, child->real_x, child->real_y, newg, ad->opens_num );
 
 	/* Check for borders from parent to child ---------- */
-	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ ) )
+	rtree_n * nr = get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ );
+	if( nr )
 	{
+//printf( "- Opa barrier! ..\n" );
 		//newg += 50.0/* m */;
 		return;
 	}
 
 	if( child->state && ( child->g <= newg ) )
 	{
+//printf( "- Opa child->g <= newg ..\n" );
 		return;
 	}
 
+//printf( "- state=%i\n", child->state );
 
 	child->parent = parent;
 	child->g = newg;
-	child->h = sqrt( ( float )( child->x - 0 ) * ( float )( child->x - 0 ) +
-			( float )( child->y - len ) * ( float )( child->y - len ) );
+	child->h = sqrt( ( child->x - 0 ) * ( child->x - 0 ) +
+			( child->y - len ) * ( child->y - len ) );
 	child->f = child->g + child->h;
 
-//printf( "++ child=%p state=%i\n", child, child->state );
+
 	if( child->state == 1/*open*/ )
 	{
-//printf( "to_up %p\n", child );
 		to_up( ad, child );
 	}
 	else
 	{
-//printf( "add_to_heap %p\n", child );
 		add_to_heap( ad, child );
 	}
+//printf( "--\n" );
 }
 
 astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, float ey )
 {
+	assert( ad );
+	assert( stubs );
 //printf( "Reset A* ... blocks cnt=%i\n", ad->nblk_cnt );
 	/* Clear previus route. */
 	ad->n_use_num = 0;
