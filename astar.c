@@ -188,8 +188,7 @@ static void check_node( astar * ad, rtree * stubs,
 //printf( "+ Check node %p[%f : %f] newg=%f .. opens=%i\n", child, child->real_x, child->real_y, newg, ad->opens_num );
 
 	/* Check for borders from parent to child ---------- */
-	rtree_n * nr = get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ );
-	if( nr )
+	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.2/* 20sm */ ) )
 	{
 //printf( "- Opa barrier! ..\n" );
 		//newg += 50.0/* m */;

@@ -435,7 +435,10 @@ static void * gui_entry( void * args )
 						if( !( point_cnt ) ) break;
 						point_cnt--;
 
-						astar_n * node = cb->node + an;
+						astar_n tb;
+						memcpy( &tb, cb->node + an, sizeof( tb ) );
+
+						astar_n * node = &tb;
 						float fx = node->real_x;
 						float fy = node->real_y;
 //printf( "nd( %i:%i )->(%f:%f)\n", node->x, node->y, fx, fy );
