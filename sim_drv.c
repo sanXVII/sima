@@ -66,45 +66,20 @@ static void reset_task( sim_drv * drv )
 	get_next_task( &( drv->act_task ), 
 		drv->the_ant, drv->world );
 
-	int i;
 	float bx = drv->the_ant->pos_x;
 	float by = drv->the_ant->pos_y;
 	float bang = drv->the_ant->pos_ang;
-	float ex;
-	float ey;
-	float eang;
+	float ex = drv->act_task.tg_x;
+	float ey = drv->act_task.tg_y;
+	float eang = drv->act_task.tg_ang;
 
-	for( i = 0; i < MAX_SP3; i++ )
-	{
-		/* Random point */
-		if( i == MAX_SP3 - 1 )
-		{
-			ex = drv->act_task.tg_x;
-			ey = drv->act_task.tg_y;
-			eang = drv->act_task.tg_ang;
-		}
-		else
-		{
-			ex = ( float )( rand() % 180 ) / 30.0 - 3.0;
-			ey = ( float )( rand() % 180 ) / 30.0 - 3.0;
-			eang = M_PI * ( float )( rand() % 100 ) / 50.0;
-		}
-
-		make_sp3_seg( &( drv->trace[ i ] ), bx, by, bang, ex, ey, eang );
-
-		bx = ex;
-		by = ey;
-		bang = eang;
-	}
-	drv->sp3_num = i;
-	drv->cur_sp3 = 0;
+	make_sp3_seg( &( drv->sp3 ), bx, by, bang, ex, ey, eang );
 	drv->now_t = 0.0; /* begin of spline */
 
 	/* A* */
 	astar_n * route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x, 
 			drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
 printf( "А* из %i точек ..\n", drv->a_star->n_use_num );
-	
 }
 
 
@@ -124,18 +99,14 @@ void exec_sim_drv( void )
 
 		if( drv->now_t + time_plus > 1.0 )
 		{
-			drv->cur_sp3++;
+			/* Here we need to make new sp3. */
 			drv->now_t = 0.0; /* begin of spline */
-
-			if( drv->cur_sp3 == drv->sp3_num )
-			{
-				reset_task( drv );
-			}
+			reset_task( drv );
 		}
 
 		/* Test route */
 
-		sp3_seg * trace = drv->trace + drv->cur_sp3;
+		sp3_seg * trace = &( drv->sp3 );
 
 		/* Find compensation of error. */
 		float now_x = trace->bx[0] + trace->bx[1] * drv->now_t +

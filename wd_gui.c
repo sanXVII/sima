@@ -393,23 +393,18 @@ static void * gui_entry( void * args )
 
 				int i;
 				float t;
-				sp3_seg * trace;
-				for( i = 0; i < sdrv->sp3_num; i++ )
+				sp3_seg * trace = &( sdrv->sp3 );
+				for( t = 0.0; t < 1.0; t += 0.05 )
 				{
-					trace = sdrv->trace + i;
-					for( t = 0.0; t < 1.0; t += 0.05 )
-					{
-						glVertex3f( trace->bx[0] + trace->bx[1]*t +
-							trace->bx[2]*t*t + trace->bx[3]*t*t*t, 
-							trace->by[0] + trace->by[1]*t +
-							trace->by[2]*t*t + trace->by[3]*t*t*t, 
-							0.0 );
-					}
+					glVertex3f( trace->bx[0] + trace->bx[1]*t +
+						trace->bx[2]*t*t + trace->bx[3]*t*t*t, 
+						trace->by[0] + trace->by[1]*t +
+						trace->by[2]*t*t + trace->by[3]*t*t*t, 
+						0.0 );
 				}
 				glEnd();
 
 				t = sdrv->now_t;
-				trace = sdrv->trace + sdrv->cur_sp3;
 				float tx = trace->bx[0] + trace->bx[1]*t +
 					trace->bx[2]*t*t + trace->bx[3]*t*t*t;
 				float ty = trace->by[0] + trace->by[1]*t +

@@ -26,14 +26,15 @@ typedef struct sim_drv
 	struct ant * the_ant;
 	struct wd_of_ants * world;
 	struct task act_task;
+	struct astar * a_star;
 
-	int sp3_num; /* Number of segmant */
-	struct sp3_seg trace[ MAX_SP3 ];
+	//int sp3_num; /* Number of segmant */
+	struct sp3_seg sp3;
+	//struct sp3_seg trace[ MAX_SP3 ];
 	
-	int cur_sp3; /* Current segment */
+	//int cur_sp3; /* Current segment */
 	float now_t; /* Position on segment [0.0 .. 1.0). */
 
-	struct astar * a_star;
 
 	struct sim_drv * next;
 } sim_drv;
