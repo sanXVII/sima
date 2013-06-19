@@ -9,6 +9,7 @@
 #include "sim_drv.h"
 #include "wd_of_ants.h"
 #include "astar.h"
+#include "rtree.h"
 
 
 /* Chain of simple drivers. */
@@ -60,26 +61,70 @@ static void make_sp3_seg( sp3_seg * p, float beg_x, float beg_y, float beg_ang,
 	p->by[3] = 2 * ( beg_y - end_y ) + beg_dy + end_dy;	
 }
 
+static int track_is_fail( sp3_seg * sp3, rtree * stubs )
+{
+	float t;
+	for( t = 0.0; t < 1.0; t += 0.005 )
+	{
+		float x = sp3->bx[0] + sp3->bx[1]*t + sp3->bx[2]*t*t + sp3->bx[3]*t*t*t;
+		float y = sp3->by[0] + sp3->by[1]*t + sp3->by[2]*t*t + sp3->by[3]*t*t*t;
+
+		if( get_next_near( stubs->adam, x, y, 0.15/* 15sm */ ) ) return 1/* fail */;
+	}
+
+	return 0/* good */;
+}
+
+static void make_next_track( sim_drv * drv )
+{
+	while( 1 )
+	{
+		if( !drv->route ) return;
+
+		astar_n * pp = drv->route;
+		drv->route = drv->route->dao;
+		
+		float bx = drv->the_ant->pos_x;
+		float by = drv->the_ant->pos_y;
+		float bang = drv->the_ant->pos_ang;
+
+		float ex = ( drv->route ) ? drv->route->real_x : drv->act_task.tg_x;
+		float ey = ( drv->route ) ? drv->route->real_y : drv->act_task.tg_y;
+
+		/* Finish angle */
+		float dx = ex - pp->real_x;
+		float dy = ey - pp->real_y;
+		float norm = sqrt( dx * dx + dy * dy );
+		float c_angle = asin( dy / norm );
+		c_angle = dx < 0.0 ? M_PI - c_angle : c_angle;
+
+		float eang = ( drv->route ) ? c_angle : drv->act_task.tg_ang;
+
+		sp3_seg sp3;
+		make_sp3_seg( &sp3, bx, by, bang, ex, ey, eang );
+
+		if( !track_is_fail( &sp3, drv->world->stub ) )
+		{
+			drv->sp3 = sp3;
+			drv->now_t = 0.0;
+		}
+		else
+		{
+			return;
+		}
+	}
+}
+
 
 static void reset_task( sim_drv * drv )
 {
 	get_next_task( &( drv->act_task ), 
 		drv->the_ant, drv->world );
 
-	float bx = drv->the_ant->pos_x;
-	float by = drv->the_ant->pos_y;
-	float bang = drv->the_ant->pos_ang;
-	float ex = drv->act_task.tg_x;
-	float ey = drv->act_task.tg_y;
-	float eang = drv->act_task.tg_ang;
-
-	make_sp3_seg( &( drv->sp3 ), bx, by, bang, ex, ey, eang );
-	drv->now_t = 0.0; /* begin of spline */
-
 	/* A* */
-	astar_n * route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x, 
+	drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x, 
 			drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
-printf( "А* из %i точек ..\n", drv->a_star->n_use_num );
+
 }
 
 
@@ -91,21 +136,27 @@ void exec_sim_drv( void )
 	{
 		float time_plus = 0.002;
 
-		/* Check for task. */
-		if( !drv->act_task.status ) 
+		if( !drv->act_task.status )
 		{
 			reset_task( drv );
+			make_next_track( drv );
 		}
 
+		/* Check for task. */
 		if( drv->now_t + time_plus > 1.0 )
 		{
-			/* Here we need to make new sp3. */
-			drv->now_t = 0.0; /* begin of spline */
-			reset_task( drv );
+			if( !drv->route )
+			{
+				reset_task( drv );
+				make_next_track( drv );
+			}
+			else
+			{
+				make_next_track( drv );
+			}
 		}
 
 		/* Test route */
-
 		sp3_seg * trace = &( drv->sp3 );
 
 		/* Find compensation of error. */
