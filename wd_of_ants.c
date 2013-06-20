@@ -43,6 +43,47 @@ static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 }
 
 
+void reset_barriers( void )
+{
+	rtree * ob = my_world.stub;
+	my_world.stub = new_rtree();
+	assert( my_world.stub );
+
+	del_rtree( ob );
+}
+
+void add_random_barriers( void )
+{
+	int i;
+	for( i = 0; i < 10; i++ )
+	{
+		float xx = ( float )( rand() % 100 ) / 25.0 - 2.0;
+		float yy = ( float )( rand() % 100 ) / 25.0 - 2.0;
+		to_rtree( my_world.stub, xx, yy, ( void * )1 );
+	}
+}
+
+void add_barriers_1( void )
+{
+	float xx;
+	for( xx = -0.6; xx < 0.6; xx += 0.08 )
+	{
+		to_rtree( my_world.stub, xx, 0.7, ( void * )1 );
+		to_rtree( my_world.stub, xx, -0.7, ( void * )1 );
+	}
+}
+
+void add_barriers_2( void )
+{
+	float yy;
+	for( yy = -0.6; yy < 0.6; yy += 0.08 )
+	{
+		to_rtree( my_world.stub, 0.0, yy + 1.0, ( void * )1 );
+		to_rtree( my_world.stub, 0.0, yy - 1.0, ( void * )1 );
+	}
+}
+
+
 int wd_of_ants_init( void )
 {
 	memset( &my_world, 0, sizeof( my_world ) );
@@ -55,17 +96,11 @@ int wd_of_ants_init( void )
 	my_world.stub = new_rtree();
 	assert( my_world.stub );
 	
-	float xx;
-	for( xx = -0.6; xx < 0.6; xx += 0.08 )
-	{
-		to_rtree( my_world.stub, xx, 0.7, ( void * )1 );
-		to_rtree( my_world.stub, xx, -0.7, ( void * )1 );
-	}
-	float yy;
-	for( yy = -0.7; yy < 0.7; yy += 0.08 )
-	{
-		to_rtree( my_world.stub, -0.7, yy, ( void * )1 );
-	}
+	//float yy;
+	//for( yy = -0.7; yy < 0.7; yy += 0.08 )
+	//{
+	//	to_rtree( my_world.stub, -0.7, yy, ( void * )1 );
+	//}
 
 	printf( "I am happy say you that: Make the World of Ants complete!\n" );
 	return 0;

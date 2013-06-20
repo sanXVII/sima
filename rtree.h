@@ -32,12 +32,19 @@ typedef struct rtree
 
 	rtree_nblk first_blk;
 	rtree_nblk * cur_blk;
-	int cur_cnt;  
+	int cur_cnt;
+
+	int not_del_cnt; /* for thread-safe */
 } rtree;
 
 
 rtree * new_rtree( void );
 void del_rtree( rtree * rt );
+
+
+/* For multipoint read access */
+void not_del_rtree_pls( rtree * rt );
+void thx_may_del_rtree( rtree * rt );
 
 
 /* Add point to R-tree. Not thread-safe function

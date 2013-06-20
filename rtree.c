@@ -13,12 +13,15 @@ rtree * new_rtree( void )
 
 	memset( new, 0, sizeof( struct rtree ) );
 	new->cur_blk = &( new->first_blk );
-
+	new->not_del_cnt++;
 	return new;
 }
 
 void del_rtree( rtree * rt )
 {
+	rt->not_del_cnt--;
+	if( rt->not_del_cnt )return;
+
 	rtree_nblk * ct = rt->first_blk.next;
 	while( ct )
 	{
@@ -28,6 +31,16 @@ void del_rtree( rtree * rt )
 		free( kill );
 	}
 	free( rt );
+}
+
+void not_del_rtree_pls( rtree * rt )
+{
+	rt->not_del_cnt++;
+}
+
+void thx_may_del_rtree( rtree * rt )
+{
+	del_rtree( rt );
 }
 
 
@@ -163,6 +176,8 @@ static rtree_n * get_right( rtree_n * cur_n )
 
 rtree_n * get_next_near( rtree_n * cur_n, float x, float y, float delta )
 {
+	if( !cur_n ) return 0l;
+
 	rtree_n * next = cur_n;
 	int to_right = 0;
 	while( 1 )

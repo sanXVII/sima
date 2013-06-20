@@ -48,6 +48,12 @@ void wd_of_ants_destroy( void );
 void wd_of_ants_run( void );
 
 
+/* For barriers configuration */
+void reset_barriers( void );
+void add_random_barriers( void );
+void add_barriers_1( void );
+void add_barriers_2( void );
+
 
 #define TIMEQUANT 0.01 /* (Sec) Quant of simulation time. */
 

@@ -352,8 +352,11 @@ static void * gui_entry( void * args )
 		}
 
 		/* Showing stubs */
+		rtree * stubs = world->stub;
+		not_del_rtree_pls( stubs );
+
 		rtree_n * cur;
-		for( cur = get_next_near( world->stub->adam, 0.0, 0.0, 999.9 );
+		for( cur = get_next_near( stubs->adam, 0.0, 0.0, 999.9 );
 			cur != 0; cur = get_next_near( cur, 0.0, 0.0, 999.9 ) )
 		{
 			float fx = cur->max_x;
@@ -367,6 +370,7 @@ static void * gui_entry( void * args )
 			glVertex3f( fx + 0.04, fy - 0.04, 0.0 );
 			glEnd();
 		}
+		thx_may_del_rtree( stubs );
 
 		/* Show simple drivers on board. */
 		sim_drv * sdrv = all_simple_drivers();
