@@ -277,6 +277,34 @@ static void * gui_entry( void * args )
 			}
 		}
 
+		/* Show genplan */
+		int pix_cnt = 0;
+		float dlt = world->plan.pix_side / 2.3;
+		for( ix = 0; ix < world->plan.width; ix++ )
+		{
+			for( iy = 0; iy < world->plan.hight; iy++ )
+			{
+				float ccor = ( world->plan.pixs + pix_cnt )->state ? 1.0 : 0.2;
+				glBegin( GL_QUADS );
+				glNormal3f( 0.0f, 0.0f, 1.0f );
+				glColor3f( ( world->plan.pixs + pix_cnt )->red * ccor, 
+					( world->plan.pixs + pix_cnt )->green * ccor, 
+					( world->plan.pixs + pix_cnt )->blue * ccor );
+
+				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side + dlt, 
+						 world->plan.left_up_y - iy * world->plan.pix_side + dlt,  0.0f);
+				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side - dlt, 
+						 world->plan.left_up_y - iy * world->plan.pix_side + dlt,  0.0f);
+				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side - dlt, 
+						 world->plan.left_up_y - iy * world->plan.pix_side - dlt,  0.0f);
+				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side + dlt, 
+						 world->plan.left_up_y - iy * world->plan.pix_side - dlt,  0.0f);
+
+				glEnd();
+				pix_cnt++;
+			}
+		}
+
 		//glBegin(GL_LINES);
 		//glColor3f(1.0f, 0.5f, 0.5f);
 

@@ -95,12 +95,28 @@ int wd_of_ants_init( void )
 	/* Walls and barriers */
 	my_world.stub = new_rtree();
 	assert( my_world.stub );
+
+	/* Prepare mosaic plan */
+	my_world.plan.left_up_x = -2.1/* metr */;
+	my_world.plan.left_up_y = 2.1;
+	my_world.plan.pix_side = 0.02; /* 1sm */
+	my_world.plan.width = 100; /* pixels */
+	my_world.plan.hight = 100;
+
+	int pix_num = my_world.plan.width * my_world.plan.hight;
+	my_world.plan.pixs = ( pix * )malloc( sizeof( pix ) * pix_num );
+	assert( my_world.plan.pixs );
+	memset( my_world.plan.pixs, 0, pix_num * sizeof( pix ) );
+
+	int i;
+	for( i = 0; i < pix_num; i++ )
+	{
+		my_world.plan.pixs[ i ].red = ( float )i / ( float )pix_num;
+		my_world.plan.pixs[ i ].green = 1.0 - ( float )i / ( float )pix_num;
+		my_world.plan.pixs[ i ].blue = 
+			my_world.plan.pixs[ i ].red * my_world.plan.pixs[ i ].green;
+	}
 	
-	//float yy;
-	//for( yy = -0.7; yy < 0.7; yy += 0.08 )
-	//{
-	//	to_rtree( my_world.stub, -0.7, yy, ( void * )1 );
-	//}
 
 	printf( "I am happy say you that: Make the World of Ants complete!\n" );
 	return 0;
@@ -108,6 +124,7 @@ int wd_of_ants_init( void )
 
 void wd_of_ants_destroy( void )
 {
+	free( my_world.plan.pixs );
 	del_rtree( my_world.stub );
 
 	close_sim_drv();

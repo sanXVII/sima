@@ -1,6 +1,7 @@
 #ifndef WD_OF_ANTS_H_
 #define WD_OF_ANTS_H_
 
+#include "ant_furer.h"
 
 /* One ant */
 typedef struct ant
@@ -21,6 +22,27 @@ typedef struct ant
 } ant;
 
 
+/* Planning */
+typedef struct pix
+{
+	float red; /* 0.0 .. 1.0 */
+	float green;
+	float blue;
+	int state; /* 0-empty */
+} pix;
+
+typedef struct genplan
+{
+	float left_up_x;
+	float left_up_y;
+	float pix_side;
+
+	int width; /* in pixels */
+	int hight; /* in pixels */
+	pix * pixs;
+
+} genplan;
+
 
 struct rtree;
 
@@ -29,6 +51,8 @@ typedef struct wd_of_ants
 {
 	struct rtree * stub; /* Barrier points */
 	ant * muvis; /* List of muvi ants. */
+
+	struct genplan plan;
 
 	unsigned long sim_cnt;
 } wd_of_ants;
