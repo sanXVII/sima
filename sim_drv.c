@@ -79,17 +79,15 @@ static void make_next_track( sim_drv * drv )
 {
 	while( 1 )
 	{
-		if( !drv->route ) return;
-
 		astar_n * pp = drv->route;
-		drv->route = drv->route->dao;
+		if( !pp ) return;
 		
 		float bx = drv->the_ant->pos_x;
 		float by = drv->the_ant->pos_y;
 		float bang = drv->the_ant->pos_ang;
 
-		float ex = ( drv->route ) ? drv->route->real_x : drv->act_task.tg_x;
-		float ey = ( drv->route ) ? drv->route->real_y : drv->act_task.tg_y;
+		float ex = ( pp->dao ) ? pp->dao->real_x : drv->act_task.tg_x;
+		float ey = ( pp->dao ) ? pp->dao->real_y : drv->act_task.tg_y;
 
 		/* Finish angle */
 		float dx = ex - pp->real_x;
@@ -98,7 +96,7 @@ static void make_next_track( sim_drv * drv )
 		float c_angle = asin( dy / norm );
 		c_angle = dx < 0.0 ? M_PI - c_angle : c_angle;
 
-		float eang = ( drv->route ) ? c_angle : drv->act_task.tg_ang;
+		float eang = ( pp->dao ) ? c_angle : drv->act_task.tg_ang;
 
 		sp3_seg sp3;
 		make_sp3_seg( &sp3, bx, by, bang, ex, ey, eang );
@@ -107,6 +105,7 @@ static void make_next_track( sim_drv * drv )
 		{
 			drv->sp3 = sp3;
 			drv->now_t = 0.0;
+			drv->route = pp->dao;
 		}
 		else
 		{
