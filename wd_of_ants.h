@@ -22,7 +22,7 @@ typedef struct ant
 } ant;
 
 
-/* Planning */
+/* Planning pixels */
 typedef struct pix
 {
 	float red; /* 0.0 .. 1.0 */
@@ -43,8 +43,10 @@ typedef struct genplan
 
 } genplan;
 
-
 struct rtree;
+
+
+
 
 /* Main struct for fully describe of one system. */
 typedef struct wd_of_ants

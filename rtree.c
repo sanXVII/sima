@@ -122,7 +122,7 @@ static void to_rtree_node( rtree * rt, rtree_n * parent, rtree_n * child )
 	to_rtree_node( rt, best_child, child );
 }
 
-void to_rtree( rtree * rt, float x, float y, void * val )
+rtree_n * to_rtree( rtree * rt, float x, float y, void * val )
 {
 	rtree_n * nn = get_new_node( rt );
 	nn->max_x = nn->min_x = x;
@@ -137,6 +137,8 @@ void to_rtree( rtree * rt, float x, float y, void * val )
 	{
 		to_rtree_node( rt, rt->adam, nn );
 	}
+
+	return nn;
 }
 
 

@@ -51,7 +51,7 @@ void thx_may_del_rtree( rtree * rt );
  * rt   - main data
  * x, y - point coordinates
  * p    - pointer to customer data */
-void to_rtree( rtree * rt, float x, float y, void * val );
+rtree_n * to_rtree( rtree * rt, float x, float y, void * val );
 
 /* Find near node.
  *
