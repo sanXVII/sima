@@ -2,6 +2,7 @@
 #define WD_OF_ANTS_H_
 
 #include "ant_furer.h"
+#include "wd_free_pix.h"
 
 /* One ant */
 typedef struct ant
@@ -55,6 +56,8 @@ typedef struct wd_of_ants
 	ant * muvis; /* List of muvi ants. */
 
 	struct genplan plan;
+	free_pixels * free_pixs;
+	free_pixels * free_pixs_4del;
 
 	unsigned long sim_cnt;
 } wd_of_ants;

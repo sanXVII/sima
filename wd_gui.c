@@ -305,6 +305,34 @@ static void * gui_entry( void * args )
 			}
 		}
 
+		/* Show free pixels (chips) */
+		free_pixels * pixs = world->free_pixs;
+		if( pixs )
+		{
+			free_pix * pix = find_next_pixel( pixs, 0l/*first*/, 0.0, 0.0, 100.0/*m*/ );
+			while( pix )
+			{
+//printf( "pix = %p\n", pix );
+				glPushMatrix();
+				glTranslatef( pix->node->max_x, pix->node->max_y, 0.1 );
+				glRotatef( pix->angle * 180 / M_PI, 0.0, 0.0, 1.0 );
+
+				glBegin( GL_QUADS );
+				glNormal3f( 0.0f, 0.0f, 1.0f );
+				glColor3f( pix->red, pix->green, pix->blue  );
+				glVertex3f( dlt, dlt, 0.0f );
+				glVertex3f( ( -1 ) * dlt, dlt, 0.0f );
+				glVertex3f( ( -1 ) * dlt, ( -1 ) * dlt, 0.0f );
+				glVertex3f( dlt, ( -1 ) * dlt, 0.0f );
+				glEnd();
+
+				glPopMatrix();
+				pix = find_next_pixel( pixs, pix, 0.0, 0.0, 100.0/*m*/ );
+			}
+		}
+//printf( "-------------------\n" );
+
+
 		//glBegin(GL_LINES);
 		//glColor3f(1.0f, 0.5f, 0.5f);
 

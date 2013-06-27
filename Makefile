@@ -11,8 +11,8 @@ LIBS = -lm `sdl-config --libs` -lSDL_ttf -lGL -lGLU
 
 all: sima rtree_test
 
-sima: main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o
-	$(CC) -o sima main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o $(CFLAGS) $(LDFLAGS) $(LIBS)
+sima: main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o wd_free_pix.o
+	$(CC) -o sima main.o wd_of_ants.o wd_gui.o sim_drv.o ant_furer.o astar.o rtree.o wd_free_pix.o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c -o main.o main.c
@@ -34,6 +34,9 @@ astar.o: astar.c
 
 rtree.o: rtree.c
 	$(CC) $(CFLAGS) -c -o rtree.o rtree.c
+
+wd_free_pix.o: wd_free_pix.c
+	$(CC) $(CFLAGS) -c -o wd_free_pix.o wd_free_pix.c
 
 rtree_test: rtree.o rtree_test.c
 	$(CC) rtree_test.c -o rtree_test rtree.o $(CFLAGS) $(LDFLAGS) $(LIBS)

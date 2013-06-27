@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "wd_free_pix.h"
 
@@ -60,6 +61,7 @@ free_pix * add_pixel( free_pixels * das, float x, float y,
 	pix->blue = b;
 	pix->angle = angle;
 	pix->node = to_rtree( das->tree, x, y, pix );
+printf( "++ Pix %p .. node %p\n", pix, pix->node );
 
 	das->pix_cnt++;
 	return pix;
@@ -72,6 +74,7 @@ free_pix * find_next_pixel( free_pixels * das, free_pix * cpix,
 	rtree_n * cn = cpix ? cpix->node : das->tree->adam;
 	cn = get_next_near( cn, x, y, delta );
 
+printf( "%p ..\n", cn );
 	free_pix * rv = cn ? ( free_pix * )cn->val : 0l;
 	return rv;
 }

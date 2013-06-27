@@ -7,6 +7,7 @@
 #include "wd_of_ants.h"
 #include "sim_drv.h"
 #include "rtree.h"
+#include "wd_free_pix.h"
 
 
 
@@ -124,6 +125,9 @@ int wd_of_ants_init( void )
 
 void wd_of_ants_destroy( void )
 {
+	if( my_world.free_pixs_4del ) del_free_pixels( my_world.free_pixs_4del );
+	if( my_world.free_pixs ) del_free_pixels( my_world.free_pixs );
+
 	free( my_world.plan.pixs );
 	del_rtree( my_world.stub );
 
@@ -177,5 +181,28 @@ void wd_of_ants_run( void )
 	}
 
 	my_world.sim_cnt++;
+
+	if( !( my_world.sim_cnt % 2000 ) )
+	{
+		/* Update free pixels locations */
+		free_pixels * new_data = new_free_pixels();
+
+		int i;
+		for( i = 0; i < 200; i++ )
+		{
+			float x = ( float )( rand() % 100 ) / 50.0;
+			float y = ( float )( rand() % 100 ) / ( -50.0 );
+			float r = ( float )( rand() % 100 ) / 100.0;
+			float g = ( float )( rand() % 100 ) / 100.0;
+			float b = ( float )( rand() % 100 ) / 100.0;
+			float ang = ( float )( rand() % 628 ) / 100.0;
+			add_pixel( new_data, x, y, r, g, b, ang );
+		}
+
+		/* Swappping data and destroy oldies. */
+		if( my_world.free_pixs_4del ) del_free_pixels( my_world.free_pixs_4del );
+		my_world.free_pixs_4del = my_world.free_pixs;
+		my_world.free_pixs = new_data;
+	}
 }
 
