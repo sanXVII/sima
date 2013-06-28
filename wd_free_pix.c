@@ -61,7 +61,7 @@ free_pix * add_pixel( free_pixels * das, float x, float y,
 	pix->blue = b;
 	pix->angle = angle;
 	pix->node = to_rtree( das->tree, x, y, pix );
-printf( "++ Pix %p .. node %p\n", pix, pix->node );
+printf( "++ Pix %p .. node %p .. %f:%f:%f\n", pix, pix->node,x, y, angle );
 
 	das->pix_cnt++;
 	return pix;
@@ -71,10 +71,11 @@ printf( "++ Pix %p .. node %p\n", pix, pix->node );
 free_pix * find_next_pixel( free_pixels * das, free_pix * cpix,
                                 float x, float y, float delta )
 {
+printf( "das %p .. cpix %p\n", das, cpix );
+sleep( 1 );
 	rtree_n * cn = cpix ? cpix->node : das->tree->adam;
 	cn = get_next_near( cn, x, y, delta );
 
-printf( "%p ..\n", cn );
 	free_pix * rv = cn ? ( free_pix * )cn->val : 0l;
 	return rv;
 }
