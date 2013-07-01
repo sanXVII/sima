@@ -40,7 +40,7 @@ void del_free_pixels( free_pixels * das )
 
 
 
-free_pix * add_pixel( free_pixels * das, float x, float y,
+void add_pixel( free_pixels * das, float x, float y,
                         float r, float g, float b, float angle )
 {
 	int b_in = das->pix_cnt % PIX_BLK_SZ;
@@ -60,23 +60,26 @@ free_pix * add_pixel( free_pixels * das, float x, float y,
 	pix->green = g;
 	pix->blue = b;
 	pix->angle = angle;
-	pix->node = to_rtree( das->tree, x, y, pix );
-printf( "++ Pix %p .. node %p .. %f:%f:%f\n", pix, pix->node,x, y, angle );
+	pix->x = x;
+	pix->y = y;
+	to_rtree( das->tree, x, y, pix );
 
 	das->pix_cnt++;
-	return pix;
 }
 
 
-free_pix * find_next_pixel( free_pixels * das, free_pix * cpix,
+free_pix * find_next_pixel( free_pixels * das, rtree_n ** search,
                                 float x, float y, float delta )
 {
-printf( "das %p .. cpix %p\n", das, cpix );
-sleep( 1 );
-	rtree_n * cn = cpix ? cpix->node : das->tree->adam;
-	cn = get_next_near( cn, x, y, delta );
+	rtree_n * cn = 0l;
 
-	free_pix * rv = cn ? ( free_pix * )cn->val : 0l;
+	search = !search ? &cn : search;
+	*search = !( *search ) ? das->tree->adam : ( *search );
+//printf( "Search %p .. %f..%f..%f", *search, x, y, delta  );	
+	*search = get_next_near( *search, x, y, delta );
+//printf( " ..ret %p\n", *search );
+
+	free_pix * rv = ( *search ) ? ( free_pix * )( *search )->val : 0l;
 	return rv;
 }
 

@@ -199,13 +199,11 @@ void wd_of_ants_run( void )
 
 			add_pixel( new_data, x, y, r, g, b, ang );
 		}
-		print_rtree( new_data->tree );
 
 		/* Swappping data and destroy oldies. */
 		if( my_world.free_pixs_4del ) del_free_pixels( my_world.free_pixs_4del );
 		my_world.free_pixs_4del = my_world.free_pixs;
 		my_world.free_pixs = new_data;
-while(1);
 	}
 }
 

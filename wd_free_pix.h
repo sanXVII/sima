@@ -8,13 +8,13 @@
 /* Detected free pixels (chips) */
 typedef struct free_pix
 {
+	float x,y;
         float red;
         float green;
         float blue;
         float angle;
         float state; /* 0-free 1-reserved */
 
-	rtree_n * node;
 } free_pix;
 
 #define PIX_BLK_SZ 100
@@ -47,15 +47,22 @@ void del_free_pixels( free_pixels * das );
  *   x,y,angle - position on boiard
  *       r,g,b - pixel color
  */
-free_pix * add_pixel( free_pixels * das, float x, float y,
+void add_pixel( free_pixels * das, float x, float y,
 			float r, float g, float b, float angle );
 
 /* Search for next near free pixel.
  *
  *         das - general pixels data structure
- *        cpix - current search position
+ *      search - current search position (0l-if not need)
+ *
+ * Example:
+ *     Only first search: 
+ *             find_next_pixel( das, 0l, x, y, delta );
+ *     First and other searches:
+ *             rtree_n * search = 0l; 
+ *             while( find_next_pixel( das, &search, x, y, delta );
  */
-free_pix * find_next_pixel( free_pixels * das, free_pix * cpix, 
+free_pix * find_next_pixel( free_pixels * das, rtree_n ** search, 
 				float x, float y, float delta );
 
 

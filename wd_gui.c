@@ -309,12 +309,13 @@ static void * gui_entry( void * args )
 		free_pixels * pixs = world->free_pixs;
 		if( pixs )
 		{
-			free_pix * pix = find_next_pixel( pixs, 0l/*first*/, 0.0, 0.0, 100.0/*m*/ );
-			while( pix )
+			rtree_n * search = 0l;
+			free_pix * pix;
+			while( ( pix = find_next_pixel( pixs, &search, 0.0, 0.0, 100.0/*m*/ ) ) )
 			{
 //printf( "pix = %p\n", pix );
 				glPushMatrix();
-				glTranslatef( pix->node->max_x, pix->node->max_y, 0.1 );
+				glTranslatef( pix->x, pix->y, 0.1 );
 				glRotatef( pix->angle * 180 / M_PI, 0.0, 0.0, 1.0 );
 
 				glBegin( GL_QUADS );
@@ -327,7 +328,6 @@ static void * gui_entry( void * args )
 				glEnd();
 
 				glPopMatrix();
-				pix = find_next_pixel( pixs, pix, 0.0, 0.0, 100.0/*m*/ );
 			}
 		}
 //printf( "-------------------\n" );
