@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "wd_free_pix.h"
 
@@ -83,5 +84,34 @@ free_pix * find_next_pixel( free_pixels * das, rtree_n ** search,
 	return rv;
 }
 
+
+free_pix * booking_free_pix( free_pixels * das, float x, float y,
+                        float delta, float r, float g, float b, int state )
+{
+	free_pix * select = 0l;
+	float color_distance = 999.99;
+
+	rtree_n * search = 0l;
+	free_pix * pix;
+	while( ( pix = find_next_pixel( das, &search, x, y, delta ) ) )
+	{
+		if( pix->state != state ) continue;
+		float c_dist = sqrt( ( r - pix->red ) * ( r - pix->red ) + 
+			( g - pix->green ) * ( g - pix->green ) + 
+			( b - pix->blue ) * ( b - pix->blue ) );
+		if( c_dist < color_distance )
+		{
+			color_distance = c_dist;
+			select = pix;
+		}
+	}
+	if( select )
+	{
+		/* booking */
+		select->state++;
+	}
+
+	return select;
+}
 
 

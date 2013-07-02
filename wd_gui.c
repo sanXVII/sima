@@ -432,7 +432,7 @@ static void * gui_entry( void * args )
 		sim_drv * sdrv = all_simple_drivers();
 		while( sdrv )
 		{
-			if( sdrv->act_task.status )
+			if( ( sdrv->state == 5/* moving to mosaic */ ) || ( sdrv->state == 2/* moving to free chip */ ) )
 			{
 				glPushMatrix();
 				glTranslatef( sdrv->act_task.tg_x, sdrv->act_task.tg_y, 0.0 );
@@ -440,10 +440,10 @@ static void * gui_entry( void * args )
 
 				glBegin( GL_LINES );
 				glColor3f( 1.0f, 0.7f, 0.7f );
-				glVertex3f( -0.2, 0.0, 0.0 );
-				glVertex3f( 0.1, 0.0, 0.0 );
-				glVertex3f( 0.0, -0.1, 0.0 );
-				glVertex3f( 0.0, 0.1, 0.0 );
+				glVertex3f( -0.02, 0.0, 0.1 );
+				glVertex3f( 0.1, 0.0, 0.1 );
+				glVertex3f( 0.0, -0.1, 0.1 );
+				glVertex3f( 0.0, 0.1, 0.1 );
 				glEnd();
 
 				glPopMatrix();

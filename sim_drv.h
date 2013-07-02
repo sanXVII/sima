@@ -33,6 +33,8 @@ typedef struct sim_drv
 	struct sp3_seg sp3;
 	float now_t; /* Position on segment [0.0 .. 1.0). */
 
+	int state;
+	int pause;
 
 	struct sim_drv * next;
 } sim_drv;

@@ -13,7 +13,7 @@ typedef struct free_pix
         float green;
         float blue;
         float angle;
-        float state; /* 0-free 1-reserved */
+        float state; /* 0-free 1-booked 2-snatched */
 
 } free_pix;
 
@@ -64,6 +64,13 @@ void add_pixel( free_pixels * das, float x, float y,
  */
 free_pix * find_next_pixel( free_pixels * das, rtree_n ** search, 
 				float x, float y, float delta );
+
+/* Search free pixel by color and state. 
+ * ++state of selected pixel. 
+ *
+ */
+free_pix * booking_free_pix( free_pixels * das, float x, float y, 
+			float delta, float r, float g, float b, int state );
 
 
 

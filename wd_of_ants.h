@@ -41,6 +41,7 @@ typedef struct genplan
 	int width; /* in pixels */
 	int hight; /* in pixels */
 	pix * pixs;
+	int last_tasked; /* index in pixs */
 
 } genplan;
 

@@ -11,6 +11,7 @@
 #include "astar.h"
 #include "rtree.h"
 
+#define TIME_STEP (0.002)
 
 /* Chain of simple drivers. */
 static sim_drv * drivers = 0l;
@@ -75,7 +76,7 @@ static int track_is_fail( sp3_seg * sp3, rtree * stubs )
 	return 0/* good */;
 }
 
-static void make_next_track( sim_drv * drv )
+static void make_next_track( sim_drv * drv, float dst_x, float dst_y, float dst_ang )
 {
 	while( 1 )
 	{
@@ -86,8 +87,8 @@ static void make_next_track( sim_drv * drv )
 		float by = drv->the_ant->pos_y;
 		float bang = drv->the_ant->pos_ang;
 
-		float ex = ( pp->dao ) ? pp->dao->real_x : drv->act_task.tg_x;
-		float ey = ( pp->dao ) ? pp->dao->real_y : drv->act_task.tg_y;
+		float ex = ( pp->dao ) ? pp->dao->real_x : dst_x;
+		float ey = ( pp->dao ) ? pp->dao->real_y : dst_y;
 
 		/* Finish angle */
 		float dx = ex - pp->real_x;
@@ -96,7 +97,7 @@ static void make_next_track( sim_drv * drv )
 		float c_angle = asin( dy / norm );
 		c_angle = dx < 0.0 ? M_PI - c_angle : c_angle;
 
-		float eang = ( pp->dao ) ? c_angle : drv->act_task.tg_ang;
+		float eang = ( pp->dao ) ? c_angle : dst_ang;
 
 		sp3_seg sp3;
 		make_sp3_seg( &sp3, bx, by, bang, ex, ey, eang );
@@ -115,15 +116,122 @@ static void make_next_track( sim_drv * drv )
 }
 
 
-static void reset_task( sim_drv * drv )
+
+static moving_ctrl( sim_drv * drv )
 {
-	get_next_task( &( drv->act_task ), 
-		drv->the_ant, drv->world );
+	/* Test route */
+	sp3_seg * trace = &( drv->sp3 );
 
-	/* A* */
-	drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x, 
-			drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
+	/* Find compensation of error. */
+	float now_x = trace->bx[0] + trace->bx[1] * drv->now_t +
+			trace->bx[2] * drv->now_t * drv->now_t + 
+			trace->bx[3] * drv->now_t * drv->now_t * drv->now_t;
+	float now_y = trace->by[0] + trace->by[1] * drv->now_t +
+			trace->by[2] * drv->now_t * drv->now_t + 
+			trace->by[3] * drv->now_t * drv->now_t * drv->now_t;
 
+	float ex = now_x - drv->the_ant->pos_x;
+	float ey = now_y - drv->the_ant->pos_y;
+
+	float corr_turn = ex * sin( drv->the_ant->pos_ang * (-1) ) +  
+			ey * cos( drv->the_ant->pos_ang * (-1) );
+	float mov = ex * cos( drv->the_ant->pos_ang * (-1) ) -
+			ey * sin( drv->the_ant->pos_ang * (-1) );
+
+	if( corr_turn < 0.0 )
+	{
+		corr_turn *= (-1) * corr_turn;
+	}
+	else
+	{
+		corr_turn *= corr_turn;
+	}
+
+	/* Lag correction value. */
+	mov = mov < -1.0 ? -1.0 : mov;
+	mov += 1.0;
+	
+	drv->the_ant->left_speed = 0.0;
+	drv->the_ant->right_speed = 0.0;
+
+	/* Offset correction turn. */
+	drv->the_ant->left_speed -= corr_turn * 500.0;
+	drv->the_ant->right_speed += corr_turn * 500.0;
+
+//printf( "Correction control: left_w=%f .. right_w=%f .. mov = %f", drv->the_ant->left_speed, drv->the_ant->right_speed, mov );
+
+	/* Major control. */
+	float now_dx = trace->bx[1] + 2 * trace->bx[2] * drv->now_t + 
+		3 * trace->bx[3] * drv->now_t * drv->now_t;
+
+	float now_dy = trace->by[1] + 2 * trace->by[2] * drv->now_t +
+		3 * trace->by[3] * drv->now_t * drv->now_t;
+
+	float now_norm = sqrt( now_dx * now_dx + now_dy * now_dy );
+
+	float c_angle = asin( now_dy / now_norm );
+	c_angle = now_dx < 0.0 ? M_PI - c_angle : c_angle;
+	c_angle -= drv->the_ant->pos_ang;
+	c_angle = sin( c_angle );
+
+	/* Angle correction turn. */
+	drv->the_ant->left_speed -= c_angle;
+	drv->the_ant->right_speed += c_angle;
+//printf( ".. sin( c_angle ) =%f\n", c_angle );
+
+	now_norm = 1.0 / now_norm;
+	
+	now_dx *= now_norm * ( drv->the_ant->axis_len / 2.0 );
+	now_dy *= now_norm * ( drv->the_ant->axis_len / 2.0 );
+	
+	drv->now_t += TIME_STEP; /* Move out */
+
+	float next_x = trace->bx[0] + trace->bx[1] * drv->now_t +
+			trace->bx[2] * drv->now_t * drv->now_t + 
+			trace->bx[3] * drv->now_t * drv->now_t * drv->now_t;
+	float next_y = trace->by[0] + trace->by[1] * drv->now_t +
+			trace->by[2] * drv->now_t * drv->now_t + 
+			trace->by[3] * drv->now_t * drv->now_t * drv->now_t;
+
+	float next_dx = trace->bx[1] + 2 * trace->bx[2] * drv->now_t + 
+		3 * trace->bx[3] * drv->now_t * drv->now_t;
+
+	float next_dy = trace->by[1] + 2 * trace->by[2] * drv->now_t +
+		3 * trace->by[3] * drv->now_t * drv->now_t;
+
+	float next_norm = sqrt( next_dx * next_dx + next_dy * next_dy );
+	next_norm = 1.0 / next_norm;
+
+	next_dy *= next_norm * ( drv->the_ant->axis_len / 2.0 );
+	next_dx *= next_norm * ( drv->the_ant->axis_len / 2.0 );
+
+	float turn_z = now_dx * next_dy - now_dy * next_dx;
+	next_x -= now_x;
+	next_y -= now_y;
+
+	float left_mov, right_mov;
+	left_mov = right_mov = sqrt( next_x * next_x + next_y * next_y ) * mov;
+
+	next_dx -= now_dx;
+	next_dy -= now_dy;
+	float turn_mov = sqrt( next_dx * next_dx + next_dy * next_dy );
+	
+	if( turn_z > 0.0 )
+	{
+		left_mov -= turn_mov;
+		right_mov += turn_mov;
+	}
+	else if( turn_z < 0.0 )
+	{
+		left_mov += turn_mov;
+		right_mov -= turn_mov;
+	}
+
+	left_mov /= drv->the_ant->tire_radius;
+	right_mov /= drv->the_ant->tire_radius;
+
+	drv->the_ant->left_speed += left_mov / TIMEQUANT;
+	drv->the_ant->right_speed += right_mov / TIMEQUANT;
 }
 
 
@@ -133,141 +241,89 @@ void exec_sim_drv( void )
 
 	while( drv )
 	{
-		float time_plus = 0.002;
-
-		if( !drv->act_task.status )
+		switch( drv->state )
 		{
-			reset_task( drv );
-			make_next_track( drv );
+			case 0: /* waiting for task */
+				if( !get_next_task( &( drv->act_task ), drv->the_ant, drv->world, 0 ) )
+				{
+					drv->state = 1;
+				}
+				goto cont;
+
+			case 1: /* waiting for track */
+				/* A* */
+				drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x,
+							drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
+				if( !drv->route ) goto cont;
+				make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
+				drv->state = 2;
+				goto cont;
+
+			case 2: /* go to free chip */
+				moving_ctrl( drv );
+				if( drv->now_t + TIME_STEP > 1.0 )
+				{
+					if( !drv->route )
+					{
+						/* Stop */
+						drv->the_ant->left_speed = 0.0;
+						drv->the_ant->right_speed = 0.0;
+						drv->state = 3;
+						drv->pause = 0;
+					}
+					else
+					{
+						make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
+					}
+				}
+				goto cont;
+
+			case 3: /* Loading */
+				drv->pause++;
+				if( drv->pause >= 200 )
+				{
+					drv->state = 4;
+				}
+				goto cont;
+
+			case 4: /* waiting track */
+				/* A* */
+				drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x,
+							drv->the_ant->pos_y, drv->act_task.dst_x, drv->act_task.dst_y );
+				if( !drv->route ) goto cont;
+				make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
+				drv->state = 5;
+				goto cont;
+
+			case 5: /* go to mosaic */
+				moving_ctrl( drv );
+				if( drv->now_t + TIME_STEP > 1.0 )
+				{
+					if( !drv->route )
+					{
+						/* Stop */
+						drv->the_ant->left_speed = 0.0;
+						drv->the_ant->right_speed = 0.0;
+						drv->state = 6;
+						drv->pause = 0;
+					}
+					else
+					{
+						make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
+					}
+				}
+				goto cont;
+
+			case 6: /* mounting chip */
+				drv->pause++;
+				if( drv->pause >= 200 )
+				{
+					drv->state = 0;
+				}
+				goto cont;
+
 		}
-
-		/* Check for task. */
-		if( drv->now_t + time_plus > 1.0 )
-		{
-			if( !drv->route )
-			{
-				reset_task( drv );
-				make_next_track( drv );
-			}
-			else
-			{
-				make_next_track( drv );
-			}
-		}
-
-		/* Test route */
-		sp3_seg * trace = &( drv->sp3 );
-
-		/* Find compensation of error. */
-		float now_x = trace->bx[0] + trace->bx[1] * drv->now_t +
-				trace->bx[2] * drv->now_t * drv->now_t + 
-				trace->bx[3] * drv->now_t * drv->now_t * drv->now_t;
-		float now_y = trace->by[0] + trace->by[1] * drv->now_t +
-				trace->by[2] * drv->now_t * drv->now_t + 
-				trace->by[3] * drv->now_t * drv->now_t * drv->now_t;
-
-		float ex = now_x - drv->the_ant->pos_x;
-		float ey = now_y - drv->the_ant->pos_y;
-
-		float corr_turn = ex * sin( drv->the_ant->pos_ang * (-1) ) +  
-				ey * cos( drv->the_ant->pos_ang * (-1) );
-		float mov = ex * cos( drv->the_ant->pos_ang * (-1) ) -
-				ey * sin( drv->the_ant->pos_ang * (-1) );
-
-		if( corr_turn < 0.0 )
-		{
-			corr_turn *= (-1) * corr_turn;
-		}
-		else
-		{
-			corr_turn *= corr_turn;
-		}
-
-		/* Lag correction value. */
-		mov = mov < -1.0 ? -1.0 : mov;
-		mov += 1.0;
-		
-		drv->the_ant->left_speed = 0.0;
-		drv->the_ant->right_speed = 0.0;
-
-		/* Offset correction turn. */
-		drv->the_ant->left_speed -= corr_turn * 500.0;
-		drv->the_ant->right_speed += corr_turn * 500.0;
-
-//printf( "Correction control: left_w=%f .. right_w=%f .. mov = %f", drv->the_ant->left_speed, drv->the_ant->right_speed, mov );
-
-		/* Major control. */
-		float now_dx = trace->bx[1] + 2 * trace->bx[2] * drv->now_t + 
-			3 * trace->bx[3] * drv->now_t * drv->now_t;
-
-		float now_dy = trace->by[1] + 2 * trace->by[2] * drv->now_t +
-			3 * trace->by[3] * drv->now_t * drv->now_t;
-
-		float now_norm = sqrt( now_dx * now_dx + now_dy * now_dy );
-
-		float c_angle = asin( now_dy / now_norm );
-		c_angle = now_dx < 0.0 ? M_PI - c_angle : c_angle;
-		c_angle -= drv->the_ant->pos_ang;
-		c_angle = sin( c_angle );
-
-		/* Angle correction turn. */
-		drv->the_ant->left_speed -= c_angle;
-		drv->the_ant->right_speed += c_angle;
-//printf( ".. sin( c_angle ) =%f\n", c_angle );
-
-		now_norm = 1.0 / now_norm;
-		
-		now_dx *= now_norm * ( drv->the_ant->axis_len / 2.0 );
-		now_dy *= now_norm * ( drv->the_ant->axis_len / 2.0 );
-		
-		drv->now_t += time_plus; /* Move out */
-
-		float next_x = trace->bx[0] + trace->bx[1] * drv->now_t +
-				trace->bx[2] * drv->now_t * drv->now_t + 
-				trace->bx[3] * drv->now_t * drv->now_t * drv->now_t;
-		float next_y = trace->by[0] + trace->by[1] * drv->now_t +
-				trace->by[2] * drv->now_t * drv->now_t + 
-				trace->by[3] * drv->now_t * drv->now_t * drv->now_t;
-
-		float next_dx = trace->bx[1] + 2 * trace->bx[2] * drv->now_t + 
-			3 * trace->bx[3] * drv->now_t * drv->now_t;
-
-		float next_dy = trace->by[1] + 2 * trace->by[2] * drv->now_t +
-			3 * trace->by[3] * drv->now_t * drv->now_t;
-
-		float next_norm = sqrt( next_dx * next_dx + next_dy * next_dy );
-		next_norm = 1.0 / next_norm;
-
-		next_dy *= next_norm * ( drv->the_ant->axis_len / 2.0 );
-		next_dx *= next_norm * ( drv->the_ant->axis_len / 2.0 );
-
-		float turn_z = now_dx * next_dy - now_dy * next_dx;
-		next_x -= now_x;
-		next_y -= now_y;
-
-		float left_mov, right_mov;
-		left_mov = right_mov = sqrt( next_x * next_x + next_y * next_y ) * mov;
-
-		next_dx -= now_dx;
-		next_dy -= now_dy;
-		float turn_mov = sqrt( next_dx * next_dx + next_dy * next_dy );
-		
-		if( turn_z > 0.0 )
-		{
-			left_mov -= turn_mov;
-			right_mov += turn_mov;
-		}
-		else if( turn_z < 0.0 )
-		{
-			left_mov += turn_mov;
-			right_mov -= turn_mov;
-		}
-
-		left_mov /= drv->the_ant->tire_radius;
-		right_mov /= drv->the_ant->tire_radius;
-
-		drv->the_ant->left_speed += left_mov / TIMEQUANT;
-		drv->the_ant->right_speed += right_mov / TIMEQUANT;
+cont:
 		drv = drv->next;
 	}
 }
