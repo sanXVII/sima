@@ -280,11 +280,13 @@ static void * gui_entry( void * args )
 		/* Show genplan */
 		int pix_cnt = 0;
 		float dlt = world->plan.pix_side / 2.3;
-		for( ix = 0; ix < world->plan.width; ix++ )
+		for( iy = 0; iy < world->plan.hight; iy++ )
 		{
-			for( iy = 0; iy < world->plan.hight; iy++ )
+			for( ix = 0; ix < world->plan.width; ix++ )
 			{
 				float ccor = ( world->plan.pixs + pix_cnt )->state ? 1.0 : 0.2;
+				float zz = ( world->plan.pixs + pix_cnt )->state ? 0.1 : 0.0;
+
 				glBegin( GL_QUADS );
 				glNormal3f( 0.0f, 0.0f, 1.0f );
 				glColor3f( ( world->plan.pixs + pix_cnt )->red * ccor, 
@@ -292,13 +294,13 @@ static void * gui_entry( void * args )
 					( world->plan.pixs + pix_cnt )->blue * ccor );
 
 				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side + dlt, 
-						 world->plan.left_up_y - iy * world->plan.pix_side + dlt,  0.0f);
+						 world->plan.left_up_y - iy * world->plan.pix_side + dlt, zz );
 				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side - dlt, 
-						 world->plan.left_up_y - iy * world->plan.pix_side + dlt,  0.0f);
+						 world->plan.left_up_y - iy * world->plan.pix_side + dlt, zz );
 				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side - dlt, 
-						 world->plan.left_up_y - iy * world->plan.pix_side - dlt,  0.0f);
+						 world->plan.left_up_y - iy * world->plan.pix_side - dlt, zz );
 				glVertex3f( world->plan.left_up_x + ix * world->plan.pix_side + dlt, 
-						 world->plan.left_up_y - iy * world->plan.pix_side - dlt,  0.0f);
+						 world->plan.left_up_y - iy * world->plan.pix_side - dlt, zz );
 
 				glEnd();
 				pix_cnt++;
@@ -313,6 +315,7 @@ static void * gui_entry( void * args )
 			free_pix * pix;
 			while( ( pix = find_next_pixel( pixs, &search, 0.0, 0.0, 100.0/*m*/ ) ) )
 			{
+				if( pix->state ) continue; /* Booked pix */
 //printf( "pix = %p\n", pix );
 				glPushMatrix();
 				glTranslatef( pix->x, pix->y, 0.1 );
@@ -360,8 +363,19 @@ static void * gui_entry( void * args )
 			glVertex3f( 0.0, +1 * cant->axis_len / 2, 0.0 );
 			glVertex3f( 0.1, 0.0, 0.0 );
 			glVertex3f( 0.0, 0.0, 0.0 );
-
 			glEnd();
+
+			if( cant->cpix.state ) /* Loaded */
+			{
+				glBegin( GL_QUADS );
+                                glNormal3f( 0.0f, 0.0f, 1.0f );
+                                glColor3f( cant->cpix.red, cant->cpix.green, cant->cpix.blue  );
+				glVertex3f( 0.1 + dlt, 0.0 + dlt, 0.0 );
+				glVertex3f( 0.1 + dlt, 0.0 - dlt, 0.0 );
+				glVertex3f( 0.1 - dlt, 0.0 - dlt, 0.0 );
+				glVertex3f( 0.1 - dlt, 0.0 + dlt, 0.0 );
+				glEnd();
+			}
 
 			/* Tyres */
 			glPushMatrix();

@@ -180,7 +180,6 @@ void wd_of_ants_run( void )
 		cant = cant->next;
 	}
 
-	my_world.sim_cnt++;
 
 	if( !( my_world.sim_cnt % 2000 ) )
 	{
@@ -205,5 +204,29 @@ void wd_of_ants_run( void )
 		my_world.free_pixs_4del = my_world.free_pixs;
 		my_world.free_pixs = new_data;
 	}
+	my_world.sim_cnt++;
 }
+
+
+void ant_catch_pix( wd_of_ants * wd, ant * at, float r, float g, float b )
+{
+	at->cpix.state = 0; /* empty */
+
+	float nx = at->pos_x + cos( at->pos_ang ) * 0.1/* nose */;
+	float ny = at->pos_y + sin( at->pos_ang ) * 0.1/* nose */;
+
+	free_pix * bpix = 0l;
+	bpix = booking_free_pix( wd->free_pixs, nx, ny,
+		0.01/* m */, r, g, b );
+	if( !bpix ) return;
+
+	/* +++ Here we must add comparison of angles. */
+	at->cpix.red = bpix->red;
+	at->cpix.green = bpix->green;
+	at->cpix.blue = bpix->blue;
+	at->cpix.state++;
+
+	bpix->state++;
+}
+
 

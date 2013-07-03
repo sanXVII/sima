@@ -223,6 +223,7 @@ static void check_node( astar * ad, rtree * stubs,
 
 astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, float ey )
 {
+printf( "make_astar( astar * ad=%p, rtree * stubs=%p, float bx=%f, float by=%f, float ex=%f, float ey=%f )", ad, stubs, bx, by, ex, ey );
 	assert( ad );
 	assert( stubs );
 //printf( "Reset A* ... blocks cnt=%i\n", ad->nblk_cnt );
@@ -234,7 +235,7 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 	/* A* points tranformation matrix */
 	float dist = sqrt( ( ex - bx ) * ( ex - bx ) + ( ey - by ) * ( ey - by ) );
 	int len = ( int )( dist / ASTEP );
-	if( !len ) return 0l;
+	//if( !len ) return 0l;
 	ad->ay_tx = ( ex - bx ) * ASTEP / dist;
 	ad->ay_ty = ( ey - by ) * ASTEP / dist;
 	ad->ax_tx = ad->ay_ty;
@@ -266,6 +267,7 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 				n->parent->dao = n;
 				n = n->parent;
 			}
+printf( " .. Return %p\n", n );
 			return n;
 		}
 

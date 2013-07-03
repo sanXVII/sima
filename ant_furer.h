@@ -13,6 +13,10 @@ struct pix;
 
 typedef struct task
 {
+	float tg_r;
+	float tg_g;
+	float tg_b;
+
 	float tg_x;
 	float tg_y;
 	float tg_ang;

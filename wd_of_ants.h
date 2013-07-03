@@ -4,23 +4,6 @@
 #include "ant_furer.h"
 #include "wd_free_pix.h"
 
-/* One ant */
-typedef struct ant
-{
-	float pos_x, pos_y; /* Position (metr) */
-	float pos_ang; /* Angle (radian) */
-	
-	float left_angle; /* Current left tire angle (rad) */
-	float right_angle; /* Current right tire angle (rad) */
-	
-	float left_speed; /* Angle speed of left tire (rad/sec) */
-	float right_speed; /* Right tire (rad/sec) */
-	
-	float axis_len; /* Width of this ant. (metr) */
-	float tire_radius; /* (metr) */
-
-	struct ant * next;
-} ant;
 
 
 /* Planning pixels */
@@ -49,6 +32,25 @@ struct rtree;
 
 
 
+/* One ant */
+typedef struct ant
+{
+	pix cpix;
+
+	float pos_x, pos_y; /* Position (metr) */
+	float pos_ang; /* Angle (radian) */
+	
+	float left_angle; /* Current left tire angle (rad) */
+	float right_angle; /* Current right tire angle (rad) */
+	
+	float left_speed; /* Angle speed of left tire (rad/sec) */
+	float right_speed; /* Right tire (rad/sec) */
+	
+	float axis_len; /* Width of this ant. (metr) */
+	float tire_radius; /* (metr) */
+
+	struct ant * next;
+} ant;
 
 /* Main struct for fully describe of one system. */
 typedef struct wd_of_ants
@@ -77,6 +79,10 @@ void wd_of_ants_destroy( void );
 /* One step to future. */
 void wd_of_ants_run( void );
 
+/* Catching free pixel on field
+ *
+ */
+void ant_catch_pix( wd_of_ants * wd, ant * at, float r, float g, float b );
 
 /* For barriers configuration */
 void reset_barriers( void );

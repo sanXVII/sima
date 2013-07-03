@@ -247,6 +247,7 @@ void exec_sim_drv( void )
 				if( !get_next_task( &( drv->act_task ), drv->the_ant, drv->world, 0 ) )
 				{
 					drv->state = 1;
+printf( "Ant state 0->1\n" );
 				}
 				goto cont;
 
@@ -254,9 +255,15 @@ void exec_sim_drv( void )
 				/* A* */
 				drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x,
 							drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
-				if( !drv->route ) goto cont;
+				if( !drv->route )
+				{
+printf( "Ant state 1->0\n" );
+					drv->state = 0;
+					goto cont;
+				}
 				make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
 				drv->state = 2;
+printf( "Ant state 1->2\n" );
 				goto cont;
 
 			case 2: /* go to free chip */
@@ -270,6 +277,11 @@ void exec_sim_drv( void )
 						drv->the_ant->right_speed = 0.0;
 						drv->state = 3;
 						drv->pause = 0;
+
+printf( "Ant state 2->3\n" );
+						/* And start chip loading */
+						ant_catch_pix( drv->world, drv->the_ant, drv->act_task.tg_r, 
+								drv->act_task.tg_g, drv->act_task.tg_b );
 					}
 					else
 					{
@@ -282,7 +294,17 @@ void exec_sim_drv( void )
 				drv->pause++;
 				if( drv->pause >= 200 )
 				{
-					drv->state = 4;
+					if( !drv->the_ant->cpix.state )
+					{
+						/* Not loaded */
+						drv->state = 0;
+printf( "Ant state 3->0\n" );
+					}
+					else
+					{
+printf( "Ant state 3->4\n" );
+						drv->state = 4;
+					}
 				}
 				goto cont;
 
@@ -293,6 +315,7 @@ void exec_sim_drv( void )
 				if( !drv->route ) goto cont;
 				make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
 				drv->state = 5;
+printf( "Ant state 3->5\n" );
 				goto cont;
 
 			case 5: /* go to mosaic */
@@ -306,6 +329,14 @@ void exec_sim_drv( void )
 						drv->the_ant->right_speed = 0.0;
 						drv->state = 6;
 						drv->pause = 0;
+printf( "Ant state 5->6\n" );
+
+						/* And mounting chip */
+						drv->act_task.dst_pix->state++;
+						drv->act_task.dst_pix->red = drv->the_ant->cpix.red;
+						drv->act_task.dst_pix->green = drv->the_ant->cpix.green;
+						drv->act_task.dst_pix->blue = drv->the_ant->cpix.blue;
+						drv->the_ant->cpix.state = 0; /* unloading */
 					}
 					else
 					{
@@ -318,6 +349,7 @@ void exec_sim_drv( void )
 				drv->pause++;
 				if( drv->pause >= 200 )
 				{
+printf( "Ant state 6->0\n" );
 					drv->state = 0;
 				}
 				goto cont;
