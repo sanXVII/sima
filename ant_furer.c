@@ -16,7 +16,24 @@ int get_next_task( task * pt, ant * pa, wd_of_ants * wd, int not_completed )
 	if( wd->plan.width * wd->plan.hight <= wd->plan.last_tasked ) return -1;
 
 
-	pt->dst_pix = wd->plan.pixs + wd->plan.last_tasked;
+	if( not_completed )
+	{
+		/* We must hide last free pixel */
+		bpix = booking_free_pix( wd->free_pixs, pt->tg_x + cos( pt->tg_ang ), 
+			pt->tg_y + sin( pt->tg_ang ), 0.02/* m */, pt->tg_r, pt->tg_g, pt->tg_b );
+
+		if( bpix )
+		{
+			bpix->state++;
+printf( "Remove free pix %p\n", bpix );
+		}
+	}
+	else
+	{
+		pt->dst_pix = wd->plan.pixs + wd->plan.last_tasked;
+		wd->plan.last_tasked++;
+	}
+
 	pt->dst_x = wd->plan.left_up_x 
 		+ ( wd->plan.last_tasked % wd->plan.width ) * wd->plan.pix_side;
 	pt->dst_y = wd->plan.left_up_y
@@ -35,10 +52,6 @@ int get_next_task( task * pt, ant * pa, wd_of_ants * wd, int not_completed )
 	pt->tg_r = bpix->red;
 	pt->tg_g = bpix->green;
 	pt->tg_b = bpix->blue;
-
-
-
-	wd->plan.last_tasked++;
 
         return 0;
 }

@@ -257,8 +257,14 @@ printf( "Ant state 0->1\n" );
 							drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
 				if( !drv->route )
 				{
+					/* We must search new free pixel */
+					if( get_next_task( &( drv->act_task ), drv->the_ant, drv->world, 1/* route fail */ ) )
+					{
 printf( "Ant state 1->0\n" );
-					drv->state = 0;
+						drv->state = 0;
+						goto cont;
+					}
+
 					goto cont;
 				}
 				make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
@@ -312,7 +318,15 @@ printf( "Ant state 3->4\n" );
 				/* A* */
 				drv->route = make_astar( drv->a_star, drv->world->stub, drv->the_ant->pos_x,
 							drv->the_ant->pos_y, drv->act_task.dst_x, drv->act_task.dst_y );
-				if( !drv->route ) goto cont;
+				if( !drv->route )
+				{
+					/* Drop chip */
+					drv->the_ant->cpix.state = 0;
+
+					/* To next pixel on genplan */
+					drv->state = 0;
+					goto cont;
+				}
 				make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
 				drv->state = 5;
 printf( "Ant state 3->5\n" );
