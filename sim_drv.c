@@ -244,7 +244,7 @@ void exec_sim_drv( void )
 		switch( drv->state )
 		{
 			case 0: /* waiting for task */
-				if( !get_next_task( &( drv->act_task ), drv->the_ant, drv->world, 0 ) )
+				if( !get_next_task( &( drv->act_task ), drv->the_ant, drv->world ) )
 				{
 					drv->state = 1;
 printf( "Ant state 0->1\n" );
@@ -258,11 +258,10 @@ printf( "Ant state 0->1\n" );
 				if( !drv->route )
 				{
 					/* We must search new free pixel */
-					if( get_next_task( &( drv->act_task ), drv->the_ant, drv->world, 1/* route fail */ ) )
+					if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
 					{
 printf( "Ant state 1->0\n" );
 						drv->state = 0;
-						goto cont;
 					}
 
 					goto cont;
@@ -303,8 +302,14 @@ printf( "Ant state 2->3\n" );
 					if( !drv->the_ant->cpix.state )
 					{
 						/* Not loaded */
-						drv->state = 0;
+						if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
+						{
 printf( "Ant state 3->0\n" );
+							drv->state = 0;
+							goto cont;
+						}
+						drv->state = 1; /* New route */
+printf( "Ant state 3->1\n" );
 					}
 					else
 					{
@@ -320,6 +325,7 @@ printf( "Ant state 3->4\n" );
 							drv->the_ant->pos_y, drv->act_task.dst_x, drv->act_task.dst_y );
 				if( !drv->route )
 				{
+printf( "Ant state 4->0\n" );
 					/* Drop chip */
 					drv->the_ant->cpix.state = 0;
 

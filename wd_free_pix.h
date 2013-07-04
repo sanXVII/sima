@@ -69,7 +69,7 @@ free_pix * find_next_pixel( free_pixels * das, rtree_n ** search,
  *
  */
 free_pix * booking_free_pix( free_pixels * das, float x, float y, 
-			float delta, float r, float g, float b );
+			float delta, float r, float g, float b, int only_free );
 
 
 

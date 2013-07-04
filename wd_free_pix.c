@@ -86,7 +86,7 @@ free_pix * find_next_pixel( free_pixels * das, rtree_n ** search,
 
 
 free_pix * booking_free_pix( free_pixels * das, float x, float y,
-                        float delta, float r, float g, float b )
+                        float delta, float r, float g, float b, int only_free )
 {
 	free_pix * select = 0l;
 	float color_distance = 999.99;
@@ -95,6 +95,7 @@ free_pix * booking_free_pix( free_pixels * das, float x, float y,
 	free_pix * pix;
 	while( ( pix = find_next_pixel( das, &search, x, y, delta ) ) )
 	{
+		if( only_free && pix->state ) continue;
 
 		float c_dist = sqrt( ( r - pix->red ) * ( r - pix->red ) + 
 			( g - pix->green ) * ( g - pix->green ) + 

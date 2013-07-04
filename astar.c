@@ -224,6 +224,7 @@ static void check_node( astar * ad, rtree * stubs,
 astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, float ey )
 {
 //printf( "make_astar( astar * ad=%p, rtree * stubs=%p, float bx=%f, float by=%f, float ex=%f, float ey=%f )", ad, stubs, bx, by, ex, ey );
+//if( ( bx > 100.0 ) || ( by > 120.0 ) ) exit(-1);
 	assert( ad );
 	assert( stubs );
 //printf( "Reset A* ... blocks cnt=%i\n", ad->nblk_cnt );
@@ -255,10 +256,10 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 	add_to_heap( ad, s );
 
 	astar_n * n;
-	int happy = 16000/* search area */;
+	//int happy = 128000/* search area */;
 	while( ( n = cut_heap_head( ad ) ) )
 	{
-		if( !( happy-- ) ) break;
+		//if( !( happy-- ) ) break;
 
 //printf( "Check %p .. opens %i\n", n, ad->opens_num );
 		if( ( n->x == 0 ) && ( n->y == len ) )
@@ -344,7 +345,7 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 //printf( "Check complete %p ..\n", n );
 
 	}
-printf( "! Path not found.. n_use_num=%i .. opens_num=%i\n", ad->n_use_num, ad->opens_num );
+printf( "! Path ( %f : %f )->( %f : %f ) not found.. n_use_num=%i .. opens_num=%i\n", bx, by, ex, ey, ad->n_use_num, ad->opens_num );
 	
 	return 0l; /* A* fail */
 }

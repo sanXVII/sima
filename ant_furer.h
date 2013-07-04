@@ -32,7 +32,12 @@ typedef struct task
  *
  *     not_completed - if not completed current task
  */
-int get_next_task( task * pt, struct ant * pa, struct wd_of_ants * wd, int not_completed );
+int get_next_task( task * pt, struct ant * pa, struct wd_of_ants * wd );
+
+/* Reset task - choose new free pix
+ *
+ */
+int reset_task( task * pt, struct ant * pa, struct wd_of_ants * wd );
 
 
 

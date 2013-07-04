@@ -196,7 +196,11 @@ void wd_of_ants_run( void )
 			float b = ( float )( rand() % 100 ) / 100.0;
 			float ang = ( float )( rand() % 628 ) / 100.0;
 
-			add_pixel( new_data, x, y, r, g, b, ang );
+			/* We should check for near barriers */
+			if( !get_next_near( my_world.stub->adam, x, y, 0.3/* 30sm */ ) )
+			{
+				add_pixel( new_data, x, y, r, g, b, ang );
+			}
 		}
 
 		/* Swappping data and destroy oldies. */
@@ -217,7 +221,7 @@ void ant_catch_pix( wd_of_ants * wd, ant * at, float r, float g, float b )
 
 	free_pix * bpix = 0l;
 	bpix = booking_free_pix( wd->free_pixs, nx, ny,
-		0.01/* m */, r, g, b );
+		0.01/* m */, r, g, b, 13/* only free */ );
 	if( !bpix ) return;
 
 	/* +++ Here we must add comparison of angles. */
