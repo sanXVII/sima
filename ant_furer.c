@@ -54,7 +54,7 @@ int reset_task( task * pt, ant * pa, wd_of_ants * wd )
 	if( bpix )
 	{
 		bpix->state++;
-printf( "Remove free pix %p\n", bpix );
+//printf( "Remove free pix %p\n", bpix );
 	}
 
 	bpix = booking_free_pix( wd->free_pixs, 0.0, 0.0,

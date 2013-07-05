@@ -188,7 +188,7 @@ static void check_node( astar * ad, rtree * stubs,
 //printf( "+ Check node %p[%f : %f] newg=%f .. opens=%i\n", child, child->real_x, child->real_y, newg, ad->opens_num );
 
 	/* Check for borders from parent to child ---------- */
-	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.3/* 30sm */ ) )
+	if( get_next_near( stubs->adam, child->real_x, child->real_y, 0.40/* 40sm */ ) )
 	{
 //printf( "- Opa barrier! ..\n" );
 		//newg += 50.0/* m */;
@@ -256,10 +256,10 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 	add_to_heap( ad, s );
 
 	astar_n * n;
-	//int happy = 128000/* search area */;
+	int happy = 10000/* search area 10x10 m2 */;
 	while( ( n = cut_heap_head( ad ) ) )
 	{
-		//if( !( happy-- ) ) break;
+		if( !( happy-- ) ) break;
 
 //printf( "Check %p .. opens %i\n", n, ad->opens_num );
 		if( ( n->x == 0 ) && ( n->y == len ) )
@@ -345,7 +345,7 @@ astar_n * make_astar( astar * ad, rtree * stubs, float bx, float by, float ex, f
 //printf( "Check complete %p ..\n", n );
 
 	}
-printf( "! Path ( %f : %f )->( %f : %f ) not found.. n_use_num=%i .. opens_num=%i\n", bx, by, ex, ey, ad->n_use_num, ad->opens_num );
+//printf( "!!!! Path ( %f : %f )->( %f : %f ) not found.. n_use_num=%i .. opens_num=%i\n", bx, by, ex, ey, ad->n_use_num, ad->opens_num );
 	
 	return 0l; /* A* fail */
 }

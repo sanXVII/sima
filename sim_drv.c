@@ -70,18 +70,19 @@ static int track_is_fail( sp3_seg * sp3, rtree * stubs )
 		float x = sp3->bx[0] + sp3->bx[1]*t + sp3->bx[2]*t*t + sp3->bx[3]*t*t*t;
 		float y = sp3->by[0] + sp3->by[1]*t + sp3->by[2]*t*t + sp3->by[3]*t*t*t;
 
-		if( get_next_near( stubs->adam, x, y, 0.15/* 15sm */ ) ) return 1/* fail */;
+		if( get_next_near( stubs->adam, x, y, 0.13/* 13sm */ ) ) return 1/* fail */;
 	}
 
 	return 0/* good */;
 }
 
-static void make_next_track( sim_drv * drv, float dst_x, float dst_y, float dst_ang )
+static int make_next_track( sim_drv * drv, float dst_x, float dst_y, float dst_ang )
 {
+	int have_track = 0;
 	while( 1 )
 	{
 		astar_n * pp = drv->route;
-		if( !pp ) return;
+		if( !pp ) return have_track;
 		
 		float bx = drv->the_ant->pos_x;
 		float by = drv->the_ant->pos_y;
@@ -107,10 +108,11 @@ static void make_next_track( sim_drv * drv, float dst_x, float dst_y, float dst_
 			drv->sp3 = sp3;
 			drv->now_t = 0.0;
 			drv->route = pp->dao;
+			have_track++;
 		}
 		else
 		{
-			return;
+			return have_track;
 		}
 	}
 }
@@ -243,11 +245,26 @@ void exec_sim_drv( void )
 	{
 		switch( drv->state )
 		{
+			case -1: /* reset task for current point */
+				drv->the_ant->left_speed = 0.0;
+				drv->the_ant->right_speed = 0.0;
+
+				if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
+				{
+					/* Reset failed. Choose new point on image */
+					drv->state = 0;
+					goto cont;
+				}
+				drv->state = 1;
+				goto cont;
+
 			case 0: /* waiting for task */
+				drv->the_ant->left_speed = 0.0;
+				drv->the_ant->right_speed = 0.0;
+
 				if( !get_next_task( &( drv->act_task ), drv->the_ant, drv->world ) )
 				{
 					drv->state = 1;
-printf( "Ant state 0->1\n" );
 				}
 				goto cont;
 
@@ -257,18 +274,16 @@ printf( "Ant state 0->1\n" );
 							drv->the_ant->pos_y, drv->act_task.tg_x, drv->act_task.tg_y );
 				if( !drv->route )
 				{
-					/* We must search new free pixel */
-					if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
-					{
-printf( "Ant state 1->0\n" );
-						drv->state = 0;
-					}
-
+					drv->state = -1;
 					goto cont;
 				}
-				make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
+
+				if( !make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang ) )
+				{
+					drv->state = -1;
+					goto cont;
+				}
 				drv->state = 2;
-printf( "Ant state 1->2\n" );
 				goto cont;
 
 			case 2: /* go to free chip */
@@ -283,14 +298,18 @@ printf( "Ant state 1->2\n" );
 						drv->state = 3;
 						drv->pause = 0;
 
-printf( "Ant state 2->3\n" );
 						/* And start chip loading */
 						ant_catch_pix( drv->world, drv->the_ant, drv->act_task.tg_r, 
 								drv->act_task.tg_g, drv->act_task.tg_b );
 					}
 					else
 					{
-						make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, drv->act_task.tg_ang );
+						if( !make_next_track( drv, drv->act_task.tg_x, drv->act_task.tg_y, 
+										drv->act_task.tg_ang ) )
+						{
+							drv->state = -1;
+							goto cont;
+						}
 					}
 				}
 				goto cont;
@@ -304,16 +323,13 @@ printf( "Ant state 2->3\n" );
 						/* Not loaded */
 						if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
 						{
-printf( "Ant state 3->0\n" );
 							drv->state = 0;
 							goto cont;
 						}
 						drv->state = 1; /* New route */
-printf( "Ant state 3->1\n" );
 					}
 					else
 					{
-printf( "Ant state 3->4\n" );
 						drv->state = 4;
 					}
 				}
@@ -325,17 +341,19 @@ printf( "Ant state 3->4\n" );
 							drv->the_ant->pos_y, drv->act_task.dst_x, drv->act_task.dst_y );
 				if( !drv->route )
 				{
-printf( "Ant state 4->0\n" );
-					/* Drop chip */
+					/* Drop chip & Go To next pixel on genplan */
 					drv->the_ant->cpix.state = 0;
-
-					/* To next pixel on genplan */
 					drv->state = 0;
 					goto cont;
 				}
-				make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
+				if( !make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang ) )
+				{
+					/* Drop chip & Go To next pixel on genplan */
+					drv->the_ant->cpix.state = 0;
+					drv->state = 0;
+					goto cont;
+				}
 				drv->state = 5;
-printf( "Ant state 3->5\n" );
 				goto cont;
 
 			case 5: /* go to mosaic */
@@ -349,7 +367,6 @@ printf( "Ant state 3->5\n" );
 						drv->the_ant->right_speed = 0.0;
 						drv->state = 6;
 						drv->pause = 0;
-printf( "Ant state 5->6\n" );
 
 						/* And mounting chip */
 						drv->act_task.dst_pix->state++;
@@ -360,7 +377,14 @@ printf( "Ant state 5->6\n" );
 					}
 					else
 					{
-						make_next_track( drv, drv->act_task.dst_x, drv->act_task.dst_y, drv->act_task.dst_ang );
+						if( !make_next_track( drv, drv->act_task.dst_x, 
+							drv->act_task.dst_y, drv->act_task.dst_ang ) )
+						{
+							/* Drop chip & Go To next pixel on genplan */
+							drv->the_ant->cpix.state = 0;
+							drv->state = 0;
+							goto cont;
+						}
 					}
 				}
 				goto cont;
@@ -369,7 +393,6 @@ printf( "Ant state 5->6\n" );
 				drv->pause++;
 				if( drv->pause >= 200 )
 				{
-printf( "Ant state 6->0\n" );
 					drv->state = 0;
 				}
 				goto cont;

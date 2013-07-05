@@ -197,7 +197,7 @@ void wd_of_ants_run( void )
 			float ang = ( float )( rand() % 628 ) / 100.0;
 
 			/* We should check for near barriers */
-			if( !get_next_near( my_world.stub->adam, x, y, 0.3/* 30sm */ ) )
+			if( !get_next_near( my_world.stub->adam, x, y, 0.45/* 45sm */ ) )
 			{
 				add_pixel( new_data, x, y, r, g, b, ang );
 			}
