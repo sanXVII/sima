@@ -21,7 +21,7 @@ int get_next_task( task * pt, ant * pa, wd_of_ants * wd )
 	pt->dst_x = wd->plan.left_up_x 
 		+ ( wd->plan.last_tasked % wd->plan.width ) * wd->plan.pix_side;
 	pt->dst_y = wd->plan.left_up_y
-		- ( wd->plan.last_tasked / wd->plan.width ) * wd->plan.pix_side - 0.1/* nose */;
+		- ( wd->plan.last_tasked / wd->plan.width ) * wd->plan.pix_side - pa->nose_len;
 	pt->dst_ang = M_PI/2.0;
 	
 	bpix = booking_free_pix( wd->free_pixs, 0.0, 0.0,
@@ -29,8 +29,8 @@ int get_next_task( task * pt, ant * pa, wd_of_ants * wd )
 
 	if( !bpix ) return -1;
 
-	pt->tg_x = bpix->x - cos( bpix->angle ) * 0.1/* nose */;
-	pt->tg_y = bpix->y - sin( bpix->angle ) * 0.1;
+	pt->tg_x = bpix->x - cos( bpix->angle ) * pa->nose_len;
+	pt->tg_y = bpix->y - sin( bpix->angle ) * pa->nose_len;
 	pt->tg_ang = bpix->angle;
 
 	pt->tg_r = bpix->red;
@@ -48,8 +48,8 @@ int reset_task( task * pt, ant * pa, wd_of_ants * wd )
 	free_pix * bpix = 0l;
 
 	/* We must hide last free pixel */
-	bpix = booking_free_pix( wd->free_pixs, pt->tg_x + cos( pt->tg_ang ) * 0.1/* nose */, 
-		pt->tg_y + sin( pt->tg_ang ) * 0.1/* nose */, 0.02/* m */, pt->tg_r, pt->tg_g, pt->tg_b, 13/* only free */ );
+	bpix = booking_free_pix( wd->free_pixs, pt->tg_x + cos( pt->tg_ang ) * pa->nose_len, 
+		pt->tg_y + sin( pt->tg_ang ) * pa->nose_len, 0.02/* m */, pt->tg_r, pt->tg_g, pt->tg_b, 13/* only free */ );
 
 	if( bpix )
 	{
@@ -62,7 +62,7 @@ int reset_task( task * pt, ant * pa, wd_of_ants * wd )
 
 	if( !bpix ) return -1;
 
-	pt->tg_x = bpix->x - cos( bpix->angle ) * 0.1/* nose */;
+	pt->tg_x = bpix->x - cos( bpix->angle ) * pa->nose_len;
 	pt->tg_y = bpix->y - sin( bpix->angle ) * 0.1;
 	pt->tg_ang = bpix->angle;
 

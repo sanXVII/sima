@@ -32,6 +32,7 @@ static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->pos_ang = ang;
 	new->tire_radius = 0.1; /* metr */
 	new->axis_len = 0.2; /* metr */
+	new->nose_len = 0.1;
 
 	/* Control axis */
 	new->left_speed = 0.0;
@@ -100,7 +101,7 @@ int wd_of_ants_init( void )
 	/* Prepare mosaic plan */
 	my_world.plan.left_up_x = -2.1/* metr */;
 	my_world.plan.left_up_y = 2.1;
-	my_world.plan.pix_side = 0.02; /* 1sm */
+	my_world.plan.pix_side = 0.02; /* 2sm */
 	my_world.plan.width = 100; /* pixels */
 	my_world.plan.hight = 100;
 
@@ -169,6 +170,9 @@ void wd_of_ants_run( void )
 		cant->pos_y += sin( cant->pos_ang ) * move;
 
 		cant->pos_ang += ( rmove - lmove ) / cant->axis_len;
+		cant->pos_ang = (cant->pos_ang > 2*M_PI) ? cant->pos_ang-2*M_PI : cant->pos_ang;
+		cant->pos_ang = (cant->pos_ang < -2*M_PI) ? cant->pos_ang+2*M_PI : cant->pos_ang;
+
 //printf( "( rmove - lmove ) / cant->axis_len =%f\n", ( rmove - lmove ) / cant->axis_len );
 //printf( "x[%p]=%f .. y[%p]=%f\n", cant, cant->pos_x, cant, cant->pos_y );
 //if( ( rand() % 1000 ) > 998 )
@@ -181,7 +185,7 @@ void wd_of_ants_run( void )
 	}
 
 
-	if( !( my_world.sim_cnt % 2000 ) )
+	if( !( my_world.sim_cnt % 4000 ) )
 	{
 		/* Update free pixels locations */
 		free_pixels * new_data = new_free_pixels();
@@ -218,14 +222,17 @@ void ant_catch_pix( wd_of_ants * wd, ant * at, float r, float g, float b )
 {
 	at->cpix.state = 0; /* empty */
 
-	float nx = at->pos_x + cos( at->pos_ang ) * 0.1/* nose */;
-	float ny = at->pos_y + sin( at->pos_ang ) * 0.1/* nose */;
+	float nx = at->pos_x + cos( at->pos_ang ) * at->nose_len;
+	float ny = at->pos_y + sin( at->pos_ang ) * at->nose_len;
 
 	free_pix * bpix = 0l;
 	bpix = booking_free_pix( wd->free_pixs, nx, ny,
 		0.01/* m */, r, g, b, 13/* only free */ );
 	if( !bpix ) return;
 
+printf( "Catch pix .. error=%f .. ant_ang=%f .. pix_ang=%f\n",
+sqrt( ( nx - bpix->x )*( nx - bpix->x ) + ( ny - bpix->y )*( ny - bpix->y ) ),
+at->pos_ang * 360 / ( 2 * M_PI ), bpix->angle * 360 / ( 2 * M_PI ) );
 	/* +++ Here we must add comparison of angles. */
 	at->cpix.red = bpix->red;
 	at->cpix.green = bpix->green;

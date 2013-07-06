@@ -11,7 +11,7 @@
 #include "astar.h"
 #include "rtree.h"
 
-#define TIME_STEP (0.002)
+#define TIME_STEP TIMEQUANT
 
 /* Chain of simple drivers. */
 static sim_drv * drivers = 0l;

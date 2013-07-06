@@ -77,7 +77,7 @@ int main( int argc, char ** argv )
 		}
 		else if( !strcmp( cmd, "rs" ) )
 		{
-			while( 1 ) { wd_of_ants_run(); usleep( 10000 ); }
+			while( 1 ) { wd_of_ants_run(); usleep( 1000 ); }
 		}
 		else if( !strcmp( cmd, "cb" ) )
 		{

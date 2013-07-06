@@ -361,7 +361,7 @@ static void * gui_entry( void * args )
 			glColor3f( 1.0f, 1.0f, 1.0f );
 			glVertex3f( 0.0, -1 * cant->axis_len / 2, 0.0 );
 			glVertex3f( 0.0, +1 * cant->axis_len / 2, 0.0 );
-			glVertex3f( 0.1, 0.0, 0.0 );
+			glVertex3f( cant->nose_len, 0.0, 0.0 );
 			glVertex3f( 0.0, 0.0, 0.0 );
 			glEnd();
 
@@ -370,10 +370,10 @@ static void * gui_entry( void * args )
 				glBegin( GL_QUADS );
                                 glNormal3f( 0.0f, 0.0f, 1.0f );
                                 glColor3f( cant->cpix.red, cant->cpix.green, cant->cpix.blue  );
-				glVertex3f( 0.1 + dlt, 0.0 + dlt, 0.0 );
-				glVertex3f( 0.1 + dlt, 0.0 - dlt, 0.0 );
-				glVertex3f( 0.1 - dlt, 0.0 - dlt, 0.0 );
-				glVertex3f( 0.1 - dlt, 0.0 + dlt, 0.0 );
+				glVertex3f( cant->nose_len + dlt, 0.0 + dlt, 0.0 );
+				glVertex3f( cant->nose_len + dlt, 0.0 - dlt, 0.0 );
+				glVertex3f( cant->nose_len - dlt, 0.0 - dlt, 0.0 );
+				glVertex3f( cant->nose_len - dlt, 0.0 + dlt, 0.0 );
 				glEnd();
 			}
 
@@ -455,7 +455,7 @@ static void * gui_entry( void * args )
 				glBegin( GL_LINES );
 				glColor3f( 1.0f, 0.7f, 0.7f );
 				glVertex3f( -0.02, 0.0, 0.1 );
-				glVertex3f( 0.1, 0.0, 0.1 );
+				glVertex3f( sdrv->the_ant->nose_len, 0.0, 0.1 );
 				glVertex3f( 0.0, -0.1, 0.1 );
 				glVertex3f( 0.0, 0.1, 0.1 );
 				glEnd();
