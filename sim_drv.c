@@ -249,13 +249,12 @@ void exec_sim_drv( void )
 				drv->the_ant->left_speed = 0.0;
 				drv->the_ant->right_speed = 0.0;
 
-				if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
+				if( !reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
 				{
 					/* Reset failed. Choose new point on image */
-					drv->state = 0;
+					drv->state = 1;
 					goto cont;
 				}
-				drv->state = 1;
 				goto cont;
 
 			case 0: /* waiting for task */
@@ -320,13 +319,7 @@ void exec_sim_drv( void )
 				{
 					if( !drv->the_ant->cpix.state )
 					{
-						/* Not loaded */
-						if( reset_task( &( drv->act_task ), drv->the_ant, drv->world ) )
-						{
-							drv->state = 0;
-							goto cont;
-						}
-						drv->state = 1; /* New route */
+						drv->state = -1; /* New free chip */
 					}
 					else
 					{

@@ -107,6 +107,8 @@ free_pix * booking_free_pix( free_pixels * das, float x, float y,
 		}
 	}
 
+	if( color_distance > 0.2/* color precision */ ) return 0l;
+
 	return select;
 }
 

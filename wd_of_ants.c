@@ -187,20 +187,22 @@ void wd_of_ants_run( void )
 		free_pixels * new_data = new_free_pixels();
 
 		int i;
-		for( i = 0; i < 200; i++ )
+		for( i = 0; i < 1600; i++ )
 		{
-			float x = ( float )( rand() % 100 ) / 50.0;
-			float y = ( float )( rand() % 100 ) / ( -50.0 );
+			float x = ( float )( rand() % 100 ) / 25.0 - 2.0;
+			float y = ( float )( rand() % 100 ) / 25.0 - 2.0;
 			float r = ( float )( rand() % 100 ) / 100.0;
 			float g = ( float )( rand() % 100 ) / 100.0;
 			float b = ( float )( rand() % 100 ) / 100.0;
 			float ang = ( float )( rand() % 628 ) / 100.0;
 
+			if( ( x < 0.1 ) && ( y > -0.1 ) ) continue;
+
 			/* We should check for near barriers */
-			if( !get_next_near( my_world.stub->adam, x, y, 0.45/* 45sm */ ) )
-			{
-				add_pixel( new_data, x, y, r, g, b, ang );
-			}
+			if( get_next_near( my_world.stub->adam, x, y, 0.45/* 45sm */ ) )
+				continue;
+
+			add_pixel( new_data, x, y, r, g, b, ang );
 		}
 
 		/* Swappping data and destroy oldies. */
