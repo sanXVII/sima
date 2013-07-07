@@ -63,7 +63,7 @@ int reset_task( task * pt, ant * pa, wd_of_ants * wd )
 	if( !bpix ) return -1;
 
 	pt->tg_x = bpix->x - cos( bpix->angle ) * pa->nose_len;
-	pt->tg_y = bpix->y - sin( bpix->angle ) * 0.1;
+	pt->tg_y = bpix->y - sin( bpix->angle ) * pa->nose_len;
 	pt->tg_ang = bpix->angle;
 
 	pt->tg_r = bpix->red;

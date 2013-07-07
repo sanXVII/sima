@@ -32,7 +32,7 @@ static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->pos_ang = ang;
 	new->tire_radius = 0.1; /* metr */
 	new->axis_len = 0.2; /* metr */
-	new->nose_len = 0.1;
+	new->nose_len = 0.05;
 
 	/* Control axis */
 	new->left_speed = 0.0;
