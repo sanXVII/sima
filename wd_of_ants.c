@@ -32,7 +32,7 @@ static ant * add_muvi_ant( wd_of_ants * wd, float x, float y, float ang )
 	new->pos_ang = ang;
 	new->tire_radius = 0.1; /* metr */
 	new->axis_len = 0.2; /* metr */
-	new->nose_len = 0.05;
+	new->nose_len = 0.1;
 
 	/* Control axis */
 	new->left_speed = 0.0;
@@ -230,9 +230,9 @@ void ant_catch_pix( wd_of_ants * wd, ant * at, float r, float g, float b )
 		0.01/* m */, r, g, b, 13/* only free */ );
 	if( !bpix ) return;
 
-printf( "Catch pix .. error=%f .. ant_ang=%f .. pix_ang=%f\n",
-sqrt( ( nx - bpix->x )*( nx - bpix->x ) + ( ny - bpix->y )*( ny - bpix->y ) ),
-at->pos_ang * 360 / ( 2 * M_PI ), bpix->angle * 360 / ( 2 * M_PI ) );
+//printf( "Catch pix .. error=%f .. ant_ang=%f .. pix_ang=%f\n",
+//sqrt( ( nx - bpix->x )*( nx - bpix->x ) + ( ny - bpix->y )*( ny - bpix->y ) ),
+//at->pos_ang * 360 / ( 2 * M_PI ), bpix->angle * 360 / ( 2 * M_PI ) );
 	/* +++ Here we must add comparison of angles. */
 	at->cpix.red = bpix->red;
 	at->cpix.green = bpix->green;

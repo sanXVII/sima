@@ -367,6 +367,8 @@ void exec_sim_drv( void )
 						drv->act_task.dst_pix->green = drv->the_ant->cpix.green;
 						drv->act_task.dst_pix->blue = drv->the_ant->cpix.blue;
 						drv->the_ant->cpix.state = 0; /* unloading */
+//printf( "Dst error = %f .. ant ang = %f\n", sqrt( ( drv->act_task.dst_x - drv->the_ant->pos_x ) * ( drv->act_task.dst_x - drv->the_ant->pos_x ) 
+//	+ ( drv->act_task.dst_y - drv->the_ant->pos_y ) * ( drv->act_task.dst_y - drv->the_ant->pos_y ) ), drv->the_ant->pos_ang * 360/(2*M_PI) );
 					}
 					else
 					{
