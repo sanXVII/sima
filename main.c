@@ -18,7 +18,8 @@ static void print_help()
 {
 	printf( "Simulation for Ants action.\n\n" );
 	printf( "Keys:\n" );
-	printf( "     -h, --help        Print this help information about mosaic ants simulator.\n" );
+	printf( "     -h, --help                Print this help information about mosaic ants simulator.\n" );
+	printf( "     -i, --image <file>        Image file.\n" );
 	printf( "\n" );
 }
 
@@ -26,6 +27,8 @@ static void print_help()
 int main( int argc, char ** argv )
 {
 	/* Loaing keys and options */
+	char * arg_image_name = 0;
+
 	int vn;
 	int arg_state = 0; /* Key name state */
 	for( vn = 1; vn < argc; vn++ )
@@ -37,7 +40,22 @@ int main( int argc, char ** argv )
 			{
 				print_usage( argv[0] );
 				print_help();
+				return 0;
 			}
+			else if( !strcmp( "-i", argv[ vn ] ) || !strcmp( "--image", argv[ vn ] ) )
+			{
+				arg_state = 1;
+			}
+			break;
+		case 1: /* Image filename */
+			if( ( !argv[ vn ][ 0 ] ) || ( argv[ vn ][ 0 ] == '-' ) )
+			{
+				printf( "Invalid filename.\n" );
+				return -1;
+			}
+			arg_image_name = argv[ vn ];
+			printf( "Image file: '%s'.\n", arg_image_name );
+			arg_state = 0;
 			break;
 		default:
 			break;
@@ -64,8 +82,15 @@ int main( int argc, char ** argv )
 			printf( "   arb - Add random stubs.\n" );
 			printf( "   ab1 - Add 2 horizontal walls.\n" );
 			printf( "   ab2 - Add vertical walls.\n" );
+			printf( "   img <filename> - Load image.\n " );
 			printf( "     q - Quit.\n" );
 			printf( "\n" );
+		}
+		else if( !strcmp( cmd, "img" ) )
+		{
+			char buf[1024];
+			while( scanf( "%s", buf ) != 1);
+			printf( "Load file '%s'\n", buf );
 		}
 		else if( !strcmp( cmd, "q" ) )
 		{
