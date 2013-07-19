@@ -5,7 +5,7 @@ LD = ld
 #CFLAGS += -Wall -O2 `sdl-config --cflags`
 CFLAGS += -O3 `sdl-config --cflags` -g
 
-LIBS = -lm `sdl-config --libs` -lSDL_ttf -lGL -lGLU
+LIBS = -lm `sdl-config --libs` -lSDL_image -lSDL_ttf -lGL -lGLU
 
 
 

@@ -4,7 +4,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
+
 #include <SDL.h>
+#include <SDL_image.h>
 
 #include "wd_of_ants.h"
 #include "wd_gui.h"
@@ -28,6 +30,105 @@ static void print_help()
 	printf( "     -i, --image <file>        Image file.\n" );
 	printf( "\n" );
 }
+
+
+
+
+static unsigned long getpixel(SDL_Surface *surface, int x, int y)
+{
+	int bpp = surface->format->BytesPerPixel;
+	/* Here p is the address to the pixel we want to retrieve */
+	unsigned char *p = (unsigned char *)surface->pixels + y * surface->pitch + x * bpp;
+
+	switch(bpp) 
+	{
+	case 1:
+		return *p;
+		break;
+
+	case 2:
+		return *(Uint16 *)p;
+		break;
+
+	case 3:
+		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+			return p[0] << 16 | p[1] << 8 | p[2];
+		else
+			return p[0] | p[1] << 8 | p[2] << 16;
+		break;
+
+	case 4:
+		return *( unsigned long *)p;
+		break;
+
+	default:
+		return 0;       /* shouldn't happen, but avoids warnings */
+	}
+}
+
+
+static void load_image( const char * filename, genplan * plan )
+{
+	int t_h = plan->width;
+	int t_w = plan->hight;
+
+	SDL_Surface * image;
+
+	image = IMG_Load( filename );
+	if( !image )
+	{
+		/* image failed to load */
+		printf("IMG_Load: %s\n", IMG_GetError());
+		return;
+	}
+
+	/* print some info about the image */
+	printf("loaded %s: %dx%d %dbpp\n", filename,
+		image->w, image->h, image->format->BitsPerPixel);
+
+	float step_x = image->w;
+	step_x /= t_w;
+	float step_y = image->h;
+	step_y /= t_h;
+
+	/* remap */
+	// SDL_GetRGB( getpixel( image, int x, int y ), image->format, Uint8 *r, Uint8 *g, Uint8 *b);
+	int h, w;
+	float r_sum, g_sum, b_sum;
+	int cntr;
+	int base_x, base_y, x, y;
+	for( h = 0; h < t_h; h++ )
+	{
+		for( w = 0; w < t_w; w++ )
+		{
+			pix * pixel = plan->pixs + w + h * t_w;
+
+			cntr = 0;
+			r_sum = g_sum = b_sum = 0;
+			base_x = ( int )( step_x * ( float )w );
+			base_y = ( int )( step_y * ( float )h );
+			for( x = 0; x < (int)step_x; x++ )
+			{
+				for( y = 0; y < (int)step_y; y++ )
+				{
+					unsigned char r, g, b;
+					SDL_GetRGB( getpixel( image, base_x + x, base_y + y ), image->format, &r, &g, &b );
+					r_sum += r; g_sum += g; b_sum += b;
+					cntr++;
+				}
+			}
+			r_sum /= cntr * 256; g_sum /= cntr * 256; b_sum /= cntr * 256;
+
+			pixel->state = 0;
+			pixel->red = r_sum;
+			pixel->green = g_sum;
+			pixel->blue = b_sum;
+		}
+	}
+
+	SDL_FreeSurface( image );
+}
+
 
 
 int main( int argc, char ** argv )
@@ -79,6 +180,7 @@ int main( int argc, char ** argv )
 	/* Chek all data and run world */
 	wd_of_ants_init();
 	init_gui();
+	if( arg_image_name ) load_image( arg_image_name, &( get_world()->plan ) );
 
 
 	/* Prepare stdin */
@@ -134,6 +236,7 @@ int main( int argc, char ** argv )
 			if( sscanf( cmd + 4, "%s", buf ) == 1 )
 			{
 				printf( "Load file '%s'\n", buf );
+				load_image( buf, &( get_world()->plan ) );
 			}
 			else
 			{
