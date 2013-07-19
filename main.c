@@ -3,9 +3,15 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <SDL.h>
 
 #include "wd_of_ants.h"
 #include "wd_gui.h"
+
+
+
+int main_done = 0; /* Global "done" event */
 
 
 
@@ -62,16 +68,52 @@ int main( int argc, char ** argv )
 		}
 	}
 
+
+	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER ) )
+	{
+		printf( "fail: %s\n", SDL_GetError() );
+		return -1;
+	}
+		
+
 	/* Chek all data and run world */
 	wd_of_ants_init();
 	init_gui();
+
+
+	/* Prepare stdin */
+	int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+	fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+
 	
-	char cmd[ 100 ];
+	char cmd[ 256/* max cmd len */ ];
 	while( 1 )
 	{
-		printf( "cmd: " );
-		while( scanf( "%s", cmd ) != 1 );
+		/* Enter new command string. */
+		int clen = 0;
+		while( !clen )
+		{
+			printf( "cmd: " );
+			while( 1 ) 
+			{
+				int c = getchar();
+				if( c == '\n' ) break;
+				if( c != EOF )
+				{
+					cmd[ clen ] = c;
+					clen++;
+					if( clen >= ( sizeof( cmd ) - 1 ) ) break;
+				}
+			
+				if( main_done ) goto exit;	
+				usleep( 1000 ); /* Polling interval */
+			}
+			cmd[ clen ] = 0; /* End of string */
+		}
 
+		if( main_done ) goto exit;
+		
+		/* Execute entered command. */
 		if( !strcmp( cmd, "h" ) )
 		{
 			printf( "List of supported commands:\n" );
@@ -86,23 +128,32 @@ int main( int argc, char ** argv )
 			printf( "     q - Quit.\n" );
 			printf( "\n" );
 		}
-		else if( !strcmp( cmd, "img" ) )
+		else if( !strncmp( cmd, "img ", 4 ) )
 		{
 			char buf[1024];
-			while( scanf( "%s", buf ) != 1);
-			printf( "Load file '%s'\n", buf );
+			if( sscanf( cmd + 4, "%s", buf ) == 1 )
+			{
+				printf( "Load file '%s'\n", buf );
+			}
+			else
+			{
+				printf( "Invalid filename.\n" );
+			}
 		}
 		else if( !strcmp( cmd, "q" ) )
 		{
+			main_done++; /* breaking all threads */
 			break;
 		}
 		else if( !strcmp( cmd, "fs" ) )
 		{
-			while( 1 ) wd_of_ants_run();
+			while( !main_done ) { wd_of_ants_run(); }
+			break;
 		}
 		else if( !strcmp( cmd, "rs" ) )
 		{
-			while( 1 ) { wd_of_ants_run(); usleep( 1000 ); }
+			while( !main_done ) { wd_of_ants_run(); usleep( 1000 ); }
+			break;
 		}
 		else if( !strcmp( cmd, "cb" ) )
 		{
@@ -126,11 +177,12 @@ int main( int argc, char ** argv )
 		}
 		//wd_of_ants_run();
 	}
-
+exit:	
 	/* Here we must to close all other threads ... */
 	close_gui();
 
 	wd_of_ants_destroy();
+	SDL_Quit();
 
 	return 0;
 }

@@ -37,7 +37,6 @@ static char fontpath[] = "./kelson/kelson_sans_light.ttf";
 static int screenwidth = 800;
 static int screenheight = 700;
 
-static int done = 0; /* GUI is running while zero. */
 
 static float z_4eye = -6.0f; /* Camera position (z) */
 static float vz_4eye = 0.0f; /* */
@@ -54,10 +53,10 @@ static int nextpoweroftwo(int x)
 	return ( int )( pow(2,ceil(logbase2)) + 0.5 );
 }
 
-static char *init_sdl(SDL_Surface** screen)
+static char *init_windows(SDL_Surface** screen)
 {
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
-		return SDL_GetError();
+	//if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))    ... moved to main()
+	//	return SDL_GetError();
 	
 	*screen = SDL_SetVideoMode(screenwidth, screenheight, 0, SDL_OPENGL);
 	
@@ -237,7 +236,7 @@ static void * gui_entry( void * args )
 	SDL_Event event;
 	
 	/* Do boring initialization */
-	if((err = init_sdl(&screen))) {
+	if((err = init_windows(&screen))) {
 		printf("Error while initializing: %s", err);
 		return 0l; /* must be returned error code */
 	}
@@ -249,7 +248,7 @@ static void * gui_entry( void * args )
 	
 	init_gl();
 
-	while( !done ) {
+	while( !main_done ) {
 		/* render a fun litte quad */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
@@ -576,7 +575,7 @@ static void * gui_entry( void * args )
 			switch (event.type)
 			{
 			case SDL_QUIT:
-				done++;
+				main_done++;
 				break;
 
 			case SDL_KEYDOWN:
@@ -596,7 +595,7 @@ static void * gui_entry( void * args )
 	TTF_CloseFont(font);
 
 	TTF_Quit();
-	SDL_Quit();
+	//SDL_Quit(); moved to main()
 	
 	return 0l;
 }
@@ -614,9 +613,6 @@ int init_gui( void )
 
 void close_gui( void )
 {
-	/* It called from main thread. */
-	done++;
-
 	void * value;
 	assert( !pthread_join( gui_pthread_id, &value) );
 }
