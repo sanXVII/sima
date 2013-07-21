@@ -9,6 +9,7 @@ int init_gui( void );
 void close_gui( void );
 
 
+void run_rtime_sim( void ); /* Run realtime simulation */
 extern int main_done; /* Global done event from/to main.c */
 
 #endif /* WD_GUI_H_ */

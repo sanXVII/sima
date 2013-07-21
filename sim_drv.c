@@ -70,7 +70,7 @@ static int track_is_fail( sp3_seg * sp3, rtree * stubs )
 		float x = sp3->bx[0] + sp3->bx[1]*t + sp3->bx[2]*t*t + sp3->bx[3]*t*t*t;
 		float y = sp3->by[0] + sp3->by[1]*t + sp3->by[2]*t*t + sp3->by[3]*t*t*t;
 
-		if( get_next_near( stubs->adam, x, y, 0.13/* 13sm */ ) ) return 1/* fail */;
+		if( get_next_near( stubs->adam, x, y, 0.14/* 14sm */ ) ) return 1/* fail */;
 	}
 
 	return 0/* good */;

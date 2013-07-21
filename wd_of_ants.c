@@ -99,11 +99,11 @@ int wd_of_ants_init( void )
 	assert( my_world.stub );
 
 	/* Prepare mosaic plan */
-	my_world.plan.left_up_x = -2.1/* metr */;
-	my_world.plan.left_up_y = 2.1;
+	my_world.plan.left_up_x = -7.1/* metr */;
+	my_world.plan.left_up_y = 5.1;
 	my_world.plan.pix_side = 0.02; /* 2sm */
-	my_world.plan.width = 100; /* pixels */
-	my_world.plan.hight = 100;
+	my_world.plan.width = 300; /* pixels */
+	my_world.plan.hight = 200;
 
 	int pix_num = my_world.plan.width * my_world.plan.hight;
 	my_world.plan.pixs = ( pix * )malloc( sizeof( pix ) * pix_num );
@@ -158,6 +158,8 @@ void wd_of_ants_run( void )
 //printf( "lrotate = %f .. rrotate = %f\n", lrotate, rrotate );
 		cant->left_angle += lrotate;
 		cant->right_angle += rrotate;
+		cant->left_angle = (cant->left_angle > 2*M_PI) ? cant->left_angle-2*M_PI : cant->left_angle;
+		cant->right_angle = (cant->right_angle > 2*M_PI) ? cant->right_angle-2*M_PI : cant->right_angle;
 //printf( "left_angle = %f .. right_angle = %f\n", cant->left_angle, cant->right_angle );
 
 		float lmove = lrotate * cant->tire_radius;
@@ -185,7 +187,7 @@ void wd_of_ants_run( void )
 	}
 
 
-	if( !( my_world.sim_cnt % 4000 ) )
+	if( !( my_world.sim_cnt % 16000 ) )
 	{
 		/* Update free pixels locations */
 		free_pixels * new_data = new_free_pixels();

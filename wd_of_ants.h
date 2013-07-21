@@ -92,7 +92,7 @@ void add_barriers_1( void );
 void add_barriers_2( void );
 
 
-#define TIMEQUANT 0.001 /* (Sec) Quant of simulation time. */
+#define TIMEQUANT 0.0002 /* (Sec) Quant of simulation time. */
 
 
 #endif /* WD_OF_ANTS_H_ */

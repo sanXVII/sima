@@ -34,18 +34,43 @@ static pthread_t gui_pthread_id;
 
 /* adjust these accordingly */
 static char fontpath[] = "./kelson/kelson_sans_light.ttf";
-static int screenwidth = 800;
+static int screenwidth = 1050;
 static int screenheight = 700;
 
 
-static float z_4eye = -6.0f; /* Camera position (z) */
-static float vz_4eye = 0.0f; /* */
+/* Camera position (z) */
+static float z_4eye = -6.0f;
+static float x_4eye = 0.0f;
+static float y_4eye = 0.0f;
+static float vz_4eye = 0.0f;
+static float vy_4eye = 0.0f;
+static float vx_4eye = 0.0f;
+
+/* Control keys */
+static char left_key = 0;
+static char right_key = 0;
+static char up_key = 0;
+static char down_key = 0;
+static char zoomin_key = 0;
+static char zoomout_key = 0;
+static char fast_key = 0;
+static char slow_key = 0;
+static char follow_key = 0;
+
 
 
 static wd_of_ants * world;
 
 
-
+static int rtsim_sleep = 2000;
+void run_rtime_sim( void )
+{
+	while( !main_done )
+	{
+		wd_of_ants_run(); 
+		if( rtsim_sleep >= 0 ) usleep( rtsim_sleep ); 
+	}
+}
 
 static int nextpoweroftwo(int x)
 {
@@ -60,7 +85,7 @@ static char *init_windows(SDL_Surface** screen)
 	
 	*screen = SDL_SetVideoMode(screenwidth, screenheight, 0, SDL_OPENGL);
 	
-	SDL_WM_SetCaption("C-Junkie's SDLGL text example", 0);
+	SDL_WM_SetCaption("Sima. Mosaic bot.", 0);
 	
 	if(TTF_Init())
 		return TTF_GetError();
@@ -192,15 +217,33 @@ static void key_down( SDLKey sym )
 	switch( sym )
 	{
         	case SDLK_LEFT:
+			left_key++;
                 	break;
         	case SDLK_RIGHT:
+			right_key++;
         		break;
         	case SDLK_UP:
-			vz_4eye += 0.05f;
+			up_key++;
         		break;
         	case SDLK_DOWN:
-			vz_4eye -= 0.05f;
+			down_key++;
                         break;
+		case SDLK_a:
+			zoomin_key++;
+			break;
+		case SDLK_z:
+			zoomout_key++;
+			break;
+		
+		case SDLK_s:
+			slow_key++;
+			break;
+		case SDLK_f:
+			fast_key++;
+			break;
+		case SDLK_SPACE:
+			follow_key = ~follow_key;
+			break;
 		default:
 			break;
 	}
@@ -211,15 +254,31 @@ static void key_up( SDLKey sym )
 	switch( sym )
 	{
         	case SDLK_LEFT:
+			left_key--;
                 	break;
         	case SDLK_RIGHT:
+			right_key--;
         		break;
         	case SDLK_UP:
-			vz_4eye = 0.0f;
+			up_key--;
         		break;
         	case SDLK_DOWN:
-			vz_4eye = 0.0f;
+			down_key--;
                         break;
+		case SDLK_a:
+			zoomin_key--;
+			break;
+		case SDLK_z:
+			zoomout_key--;
+			break;
+		case SDLK_s:
+			slow_key--;
+			break;
+		case SDLK_f:
+			fast_key--;
+			break;
+		case SDLK_SPACE:
+			break;
 		default:
 			break;
 	}
@@ -253,8 +312,35 @@ static void * gui_entry( void * args )
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 
-		z_4eye += vz_4eye;
-		glTranslatef(0.0f, 0.0f, z_4eye);
+		float gen_speed = 0.2;
+		float gspeed_pstep = 0.4;
+		float br_pstep = 0.7;
+
+		if( zoomin_key ) vz_4eye = vz_4eye * ( 1.0 - gspeed_pstep ) - gen_speed * gspeed_pstep;
+		if( zoomout_key ) vz_4eye = vz_4eye * ( 1.0 - gspeed_pstep ) + gen_speed * gspeed_pstep;
+		if( up_key ) vy_4eye = vy_4eye * ( 1.0 - gspeed_pstep ) + gen_speed * gspeed_pstep;
+		if( down_key ) vy_4eye = vy_4eye * ( 1.0 - gspeed_pstep ) - gen_speed * gspeed_pstep;
+		if( right_key ) vx_4eye = vx_4eye * ( 1.0 - gspeed_pstep ) + gen_speed * gspeed_pstep;
+		if( left_key ) vx_4eye = vx_4eye * ( 1.0 - gspeed_pstep ) - gen_speed * gspeed_pstep;
+
+		if( !zoomin_key && !zoomout_key ) vz_4eye *= br_pstep;
+		if( !up_key && !down_key ) vy_4eye *= br_pstep;
+		if( !right_key && !left_key ) vx_4eye *= br_pstep;
+		
+		
+		if( slow_key ) rtsim_sleep += 50;
+		if( fast_key ) rtsim_sleep = rtsim_sleep - 50;
+
+		z_4eye -= vz_4eye;
+		y_4eye -= vy_4eye;
+		x_4eye -= vx_4eye;
+
+		if( follow_key && world->muvis ) 
+		{ 
+			x_4eye = world->muvis->pos_x * (-1.0); 
+			y_4eye = world->muvis->pos_y * (-1.0); 
+		}
+		glTranslatef( x_4eye, y_4eye, z_4eye);
 		glDisable(GL_TEXTURE_2D);
 	
 		int ix, iy;
@@ -551,17 +637,21 @@ static void * gui_entry( void * args )
 		 * gives the X,Y coordinates of the lower-left corner of the
 		 * rectangle **/
 		position.x = 40;
-		position.y = 60;
+		position.y = 80;
 
 		static int tcnt = 0; tcnt++;
 		char tstr[100];
-		sprintf( tstr, "Number of steps: %lu", world->sim_cnt );
+		sprintf( tstr, "Step: %lu", world->sim_cnt );
 
 		SDL_GL_RenderText( tstr, font, color, &position );
 		position.y -= position.h;
-		SDL_GL_RenderText("A line right underneath", font, color, &position);
+		SDL_GL_RenderText("Bind cam: SPACE", font, color, &position);
 		position.y -= position.h;
-		SDL_GL_RenderText("Yay text rendering.", font, color, &position);
+		SDL_GL_RenderText("Zoom In/Out: 'a' / 'z'", font, color, &position);
+		position.y -= position.h;
+		SDL_GL_RenderText("Slower/Faster: 's' / 'f'", font, color, &position);
+		position.y -= position.h;
+		SDL_GL_RenderText("Cam position: LEFT / RIGHT / UP / DOWN", font, color, &position);
 
 		/* Come out of HUD mode */
 		glEnable(GL_DEPTH_TEST);
@@ -616,5 +706,6 @@ void close_gui( void )
 	void * value;
 	assert( !pthread_join( gui_pthread_id, &value) );
 }
+
 
 

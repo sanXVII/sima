@@ -69,9 +69,8 @@ static unsigned long getpixel(SDL_Surface *surface, int x, int y)
 
 static void load_image( const char * filename, genplan * plan )
 {
-	int t_h = plan->width;
-	int t_w = plan->hight;
-
+	int t_w = plan->width;
+	int t_h = plan->hight;
 	SDL_Surface * image;
 
 	image = IMG_Load( filename );
@@ -86,10 +85,10 @@ static void load_image( const char * filename, genplan * plan )
 	printf("loaded %s: %dx%d %dbpp\n", filename,
 		image->w, image->h, image->format->BitsPerPixel);
 
-	float step_x = image->w;
-	step_x /= t_w;
-	float step_y = image->h;
-	step_y /= t_h;
+	float step_x = ( float )image->w;
+	float step_y = ( float )image->h;
+	step_x /= ( float )t_w;
+	step_y /= ( float )t_h;
 
 	/* remap */
 	// SDL_GetRGB( getpixel( image, int x, int y ), image->format, Uint8 *r, Uint8 *g, Uint8 *b);
@@ -255,7 +254,7 @@ int main( int argc, char ** argv )
 		}
 		else if( !strcmp( cmd, "rs" ) )
 		{
-			while( !main_done ) { wd_of_ants_run(); usleep( 1000 ); }
+			run_rtime_sim();
 			break;
 		}
 		else if( !strcmp( cmd, "cb" ) )
